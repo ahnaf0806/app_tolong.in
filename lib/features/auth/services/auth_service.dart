@@ -19,21 +19,25 @@ class AuthService {
     required String name,
     required String email,
     required String password,
-    required String university,
-    required String studyProgram,
-    required int semester,
+    String? university,
+    String? studyProgram,
+    int? semester,
     required String role,
   }) async {
+    final metadata = <String, dynamic>{'name': name.trim(), 'role': role};
+
+    if (role == 'freelancer') {
+      metadata.addAll({
+        'university': university?.trim(),
+        'study_program': studyProgram?.trim(),
+        'semester': semester?.toString(),
+      });
+    }
+
     return _client.auth.signUp(
       email: email.trim(),
       password: password,
-      data: {
-        'name': name.trim(),
-        'role': role,
-        'university': university.trim(),
-        'study_program': studyProgram.trim(),
-        'semester': semester.toString(),
-      },
+      data: metadata,
     );
   }
 

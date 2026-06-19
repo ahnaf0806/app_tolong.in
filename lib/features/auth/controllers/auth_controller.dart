@@ -31,13 +31,33 @@ class AuthController extends ChangeNotifier {
     required String name,
     required String email,
     required String password,
-    required String university,
-    required String studyProgram,
-    required int semester,
+    required String? university,
+    required String? studyProgram,
+    required int? semester,
     required String role,
   }) async {
     _setLoading(true);
     errorMessage = null;
+
+    if (role == 'freelancer') {
+      if (university == null || university.trim().isEmpty) {
+        errorMessage = 'Universitas wajib diisi untuk freelancer.';
+        _setLoading(false);
+        return false;
+      }
+
+      if (studyProgram == null || studyProgram.trim().isEmpty) {
+        errorMessage = 'Program studi wajib diisi untuk freelancer.';
+        _setLoading(false);
+        return false;
+      }
+
+      if (semester == null || semester <= 0) {
+        errorMessage = 'Semester wajib diisi dengan benar untuk freelancer.';
+        _setLoading(false);
+        return false;
+      }
+    }
 
     try {
       await _authService.register(
