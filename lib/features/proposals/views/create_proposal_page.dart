@@ -1,178 +1,146 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../models/owner_proposal_item.dart';
+import '../../projects/models/project_model.dart';
+import '../controllers/proposal_controller.dart';
+import '../widgets/proposal_form_info_card.dart';
 
-class OwnerProposalCard extends StatelessWidget {
-  final OwnerProposalItem proposal;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
-  final bool isLoading;
+class CreateProposalPage extends StatefulWidget {
+  final ProjectModel project;
 
-  const OwnerProposalCard({
-    super.key,
-    required this.proposal,
-    required this.onAccept,
-    required this.onReject,
-    this.isLoading = false,
-  });
+  const CreateProposalPage({super.key, required this.project});
 
   @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: Colors.grey.shade300),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    proposal.projectTitle,
-                    style: textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                _StatusBadge(status: proposal.status),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Freelancer: ${proposal.freelancerName}',
-              style: textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              proposal.message,
-              style: textTheme.bodyMedium,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 16),
-            _InfoRow(label: 'Harga', value: _formatCurrency(proposal.price)),
-            _InfoRow(label: 'Estimasi', value: proposal.estimatedTime),
-            _InfoRow(label: 'Metode', value: proposal.workMethod),
-            if (proposal.isPending) ...[
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: isLoading ? null : onReject,
-                      child: const Text('Tolak'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : onAccept,
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Terima'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatCurrency(double value) {
-    return NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    ).format(value);
-  }
+  State<CreateProposalPage> createState() => _CreateProposalPageState();
 }
 
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
+class _CreateProposalPageState extends State<CreateProposalPage> {
+  final ProposalController _controller = ProposalController();
 
-  const _InfoRow({required this.label, required this.value});
+  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _estimatedTimeController =
+      TextEditingController();
+  final TextEditingController _workMethodController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          SizedBox(width: 82, child: Text(label, style: textTheme.bodySmall)),
-          Expanded(
-            child: Text(
-              value,
-              style: textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void dispose() {
+    _controller.dispose();
+    _messageController.dispose();
+    _priceController.dispose();
+    _estimatedTimeController.dispose();
+    _workMethodController.dispose();
+    super.dispose();
   }
-}
 
-class _StatusBadge extends StatelessWidget {
-  final String status;
+  Future<void> _submitProposal() async {
+    final success = await _controller.createProposal(
+      projectId: widget.project.id ?? '',
+      projectStatus: widget.project.status,
+      message: _messageController.text,
+      priceText: _priceController.text,
+      estimatedTime: _estimatedTimeController.text,
+      workMethod: _workMethodController.text,
+    );
 
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    Color backgroundColor;
-    Color textColor;
-    String label;
-
-    switch (status) {
-      case 'accepted':
-        label = 'Diterima';
-        backgroundColor = Colors.green.shade50;
-        textColor = Colors.green.shade700;
-        break;
-      case 'rejected':
-        label = 'Ditolak';
-        backgroundColor = Colors.red.shade50;
-        textColor = Colors.red.shade700;
-        break;
-      default:
-        label = 'Menunggu';
-        backgroundColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+    if (!mounted) {
+      return;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Proposal berhasil dikirim.')),
+      );
+
+      Navigator.pop(context);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_controller.errorMessage ?? 'Proposal gagal dikirim.'),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ajukan Proposal')),
+      body: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Text(
+                'Ajukan Proposal',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tawarkan kemampuan terbaikmu untuk project ini.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              ProposalFormInfoCard(project: widget.project),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _messageController,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  labelText: 'Pesan Proposal',
+                  hintText:
+                      'Jelaskan kemampuanmu, pengalaman, dan cara kamu menyelesaikan project ini.',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _priceController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Harga Penawaran',
+                  hintText: 'Contoh: 150000',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _estimatedTimeController,
+                decoration: const InputDecoration(
+                  labelText: 'Estimasi Waktu',
+                  hintText: 'Contoh: 3 hari',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _workMethodController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Metode Kerja',
+                  hintText:
+                      'Contoh: Saya akan membuat draft awal, revisi, lalu finalisasi.',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _controller.isLoading ? null : _submitProposal,
+                  child: _controller.isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Kirim Proposal'),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

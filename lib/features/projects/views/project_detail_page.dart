@@ -57,10 +57,7 @@ class ProjectDetailPage extends StatelessWidget {
                   color: AppColors.stone,
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  'Oleh ${project.ownerName}',
-                  style: AppTextStyles.bodySm,
-                ),
+                Text('Oleh ${project.ownerName}', style: AppTextStyles.bodySm),
               ],
             ),
           const SizedBox(height: AppSpacing.xl),

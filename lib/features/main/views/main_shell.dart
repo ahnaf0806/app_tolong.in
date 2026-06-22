@@ -7,7 +7,8 @@ import '../../auth/controllers/auth_controller.dart';
 import '../../profiles/services/profile_service.dart';
 import '../../projects/views/create_project_page.dart';
 import '../../projects/views/project_list_page.dart';
-import '../../proposals/views/owner_proposal_page.dart';
+import '../../workspaces/views/workspace_list_page.dart';
+import 'owner_activity_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -104,7 +105,7 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
         const _MainNavItem(
-          page: OwnerProposalPage(),
+          page: OwnerActivityPage(),
           destination: NavigationDestination(
             icon: Icon(Icons.assignment_outlined),
             selectedIcon: Icon(Icons.assignment_rounded),
@@ -157,12 +158,7 @@ class _MainShellState extends State<MainShell> {
         ),
       ),
       const _MainNavItem(
-        page: _PlaceholderPage(
-          title: 'Aktivitas',
-          description:
-              'Pantau proposal, workspace, dan riwayat project yang dikerjakan.',
-          icon: Icons.assignment_rounded,
-        ),
+        page: WorkspaceListPage(),
         destination: NavigationDestination(
           icon: Icon(Icons.assignment_outlined),
           selectedIcon: Icon(Icons.assignment_rounded),
@@ -193,7 +189,7 @@ class _MainShellState extends State<MainShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tolingin'),
+        title: const Text('Tolong.in'),
         actions: [
           if (isProfilePage)
             IconButton(

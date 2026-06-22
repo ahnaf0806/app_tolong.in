@@ -156,4 +156,47 @@ class ProposalService {
         .update({'status': 'rejected'})
         .eq('id', proposalId);
   }
+
+  Future<List<ProposalModel>> getProposalsByProject(String projectId) async {
+    final response = await _client
+        .from('proposals')
+        .select(
+          'id, project_id, freelancer_id, message, price, estimated_time, work_method, status, created_at',
+        )
+        .eq('project_id', projectId)
+        .order('created_at', ascending: false);
+
+    final proposals = response as List;
+
+    if (proposals.isEmpty) {
+      return [];
+    }
+
+    final freelancerIds = proposals
+        .map((item) => item['freelancer_id'] as String)
+        .toSet()
+        .toList();
+
+    final profileRows = await _client
+        .from('profiles')
+        .select('id, name')
+        .inFilter('id', freelancerIds);
+
+    final profiles = profileRows as List;
+
+    final freelancerNameMap = {
+      for (final profile in profiles)
+        profile['id'] as String: profile['name'] as String,
+    };
+
+    return proposals.map((item) {
+      final map = item as Map<String, dynamic>;
+      final freelancerId = map['freelancer_id'] as String;
+
+      return ProposalModel.fromJson({
+        ...map,
+        'freelancer_name': freelancerNameMap[freelancerId] ?? 'Freelancer',
+      });
+    }).toList();
+  }
 }

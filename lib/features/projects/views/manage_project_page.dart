@@ -36,7 +36,9 @@ class _ManageProjectPageState extends State<ManageProjectPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Terima Proposal?'),
-        content: const Text('Apakah kamu yakin ingin menerima proposal ini? Proposal lain akan otomatis ditolak dan workspace akan dibuat.'),
+        content: const Text(
+          'Apakah kamu yakin ingin menerima proposal ini? Proposal lain akan otomatis ditolak dan workspace akan dibuat.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -44,7 +46,10 @@ class _ManageProjectPageState extends State<ManageProjectPage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Ya, Terima'),
           ),
         ],
@@ -62,12 +67,18 @@ class _ManageProjectPageState extends State<ManageProjectPage> {
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Proposal diterima! Workspace telah dibuat.')),
+          const SnackBar(
+            content: Text('Proposal diterima! Workspace telah dibuat.'),
+          ),
         );
         _controller.loadProposals(widget.project.id!);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_controller.errorMessage ?? 'Gagal menerima proposal')),
+          SnackBar(
+            content: Text(
+              _controller.errorMessage ?? 'Gagal menerima proposal',
+            ),
+          ),
         );
       }
     }
@@ -86,7 +97,10 @@ class _ManageProjectPageState extends State<ManageProjectPage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.critical, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.critical,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Ya, Tolak'),
           ),
         ],
@@ -99,13 +113,15 @@ class _ManageProjectPageState extends State<ManageProjectPage> {
       if (!mounted) return;
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Proposal ditolak.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Proposal ditolak.')));
         _controller.loadProposals(widget.project.id!);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_controller.errorMessage ?? 'Gagal menolak proposal')),
+          SnackBar(
+            content: Text(_controller.errorMessage ?? 'Gagal menolak proposal'),
+          ),
         );
       }
     }
@@ -137,36 +153,55 @@ class _ManageProjectPageState extends State<ManageProjectPage> {
                 // Project Summary
                 Text(widget.project.title, style: AppTextStyles.headingSm),
                 const SizedBox(height: AppSpacing.xs),
-                Text('Status: ${widget.project.status}', style: AppTextStyles.bodySm),
+                Text(
+                  'Status: ${widget.project.status}',
+                  style: AppTextStyles.bodySm,
+                ),
                 const SizedBox(height: AppSpacing.xxl),
-                
+
                 // Proposals Section
                 Text('Daftar Proposal Masuk', style: AppTextStyles.subtitleLg),
                 const SizedBox(height: AppSpacing.md),
 
                 if (_controller.isLoading)
-                  const Center(child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.xxl),
-                    child: CircularProgressIndicator(),
-                  )),
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.xxl),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
 
                 if (!_controller.isLoading && _controller.errorMessage != null)
-                  Center(child: Text(_controller.errorMessage!, style: AppTextStyles.bodySm.copyWith(color: AppColors.critical))),
+                  Center(
+                    child: Text(
+                      _controller.errorMessage!,
+                      style: AppTextStyles.bodySm.copyWith(
+                        color: AppColors.critical,
+                      ),
+                    ),
+                  ),
 
-                if (!_controller.isLoading && _controller.errorMessage == null && _controller.proposals.isEmpty)
-                  const Center(child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.xxxl),
-                    child: Text('Belum ada proposal masuk.'),
-                  )),
+                if (!_controller.isLoading &&
+                    _controller.errorMessage == null &&
+                    _controller.proposals.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.xxxl),
+                      child: Text('Belum ada proposal masuk.'),
+                    ),
+                  ),
 
                 if (!_controller.isLoading && _controller.proposals.isNotEmpty)
-                  ..._controller.proposals.map((proposal) => ProposalListCard(
-                    proposal: proposal,
-                    isActionLoading: _controller.isActionLoading,
-                    canAct: projectIsActive && proposal.status == 'pending',
-                    onAccept: () => _handleAccept(proposal.id!, proposal.freelancerId),
-                    onReject: () => _handleReject(proposal.id!),
-                  )),
+                  ..._controller.proposals.map(
+                    (proposal) => ProposalListCard(
+                      proposal: proposal,
+                      isActionLoading: _controller.isActionLoading,
+                      canAct: projectIsActive && proposal.status == 'pending',
+                      onAccept: () =>
+                          _handleAccept(proposal.id!, proposal.freelancerId),
+                      onReject: () => _handleReject(proposal.id!),
+                    ),
+                  ),
               ],
             ),
           );
