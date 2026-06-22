@@ -1,3 +1,4 @@
+import 'package:app_tolongin/features/chat/views/chat_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -216,10 +217,21 @@ class _WorkspaceDetailPageState extends State<WorkspaceDetailPage> {
               const SizedBox(height: AppSpacing.xl),
               OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Fitur chat akan dibuat pada tahap berikutnya.',
+                  final receiverId = widget.isOwner
+                      ? workspace.freelancerId
+                      : workspace.ownerId;
+
+                  final partnerName = widget.isOwner
+                      ? workspace.freelancerName
+                      : workspace.ownerName;
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatPage(
+                        workspaceId: workspace.id!,
+                        receiverId: receiverId,
+                        partnerName: partnerName,
                       ),
                     ),
                   );
