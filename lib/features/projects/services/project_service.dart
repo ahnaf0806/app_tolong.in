@@ -22,6 +22,39 @@ class ProjectService {
     await _client.from('projects').insert(project.toCreateJson());
   }
 
+  /// Mengambil semua project dengan status 'open', diurutkan dari terbaru.
+  /// Join ke project_categories untuk nama kategori.
+  /// Join profiles dihilangkan karena FK mungkin tidak terdaftar di Supabase schema.
+  Future<List<ProjectModel>> getOpenProjects() async {
+    final response = await _client
+        .from('projects')
+        .select(
+          'id, owner_id, category_id, title, project_field, description, deadline, budget, difficulty, attachment_url, status, created_at, project_categories(name)',
+        )
+        .eq('status', 'open')
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((item) => ProjectModel.fromJson(item))
+        .toList();
+  }
+
+  /// Mengambil daftar project milik owner yang sedang login.
+  Future<List<ProjectModel>> getProjectsByOwner(String ownerId) async {
+    final response = await _client
+        .from('projects')
+        .select(
+          'id, owner_id, category_id, title, project_field, description, deadline, budget, difficulty, attachment_url, status, created_at, project_categories(name)',
+        )
+        .eq('owner_id', ownerId)
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((item) => ProjectModel.fromJson(item))
+        .toList();
+  }
+
+
   String getCurrentUserId() {
     final user = _client.auth.currentUser;
 
@@ -32,3 +65,4 @@ class ProjectService {
     return user.id;
   }
 }
+

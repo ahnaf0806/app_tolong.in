@@ -5,7 +5,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../profiles/services/profile_service.dart';
-import '../../projects/view/create_project_page.dart';
+import '../../projects/views/create_project_page.dart';
+import '../../projects/views/project_list_page.dart';
+import '../../proposals/views/owner_proposal_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -54,8 +56,8 @@ class _MainShellState extends State<MainShell> {
 
   List<_MainNavItem> _getNavigationItems() {
     if (_currentRole == 'project_owner') {
-      return const [
-        _MainNavItem(
+      return [
+        const _MainNavItem(
           page: _PlaceholderPage(
             title: 'Home',
             description:
@@ -68,7 +70,7 @@ class _MainShellState extends State<MainShell> {
             label: 'Home',
           ),
         ),
-        _MainNavItem(
+        const _MainNavItem(
           page: _PlaceholderPage(
             title: 'Cari Freelancer',
             description:
@@ -81,7 +83,7 @@ class _MainShellState extends State<MainShell> {
             label: 'Freelancer',
           ),
         ),
-        _MainNavItem(
+        const _MainNavItem(
           page: CreateProjectPage(),
           destination: NavigationDestination(
             icon: Icon(Icons.add_circle_outline),
@@ -89,7 +91,7 @@ class _MainShellState extends State<MainShell> {
             label: 'Buat',
           ),
         ),
-        _MainNavItem(
+        const _MainNavItem(
           page: _PlaceholderPage(
             title: 'Chat',
             description: 'Diskusi project antara project owner dan freelancer.',
@@ -101,20 +103,15 @@ class _MainShellState extends State<MainShell> {
             label: 'Chat',
           ),
         ),
-        _MainNavItem(
-          page: _PlaceholderPage(
-            title: 'Aktivitas',
-            description:
-                'Pantau project, proposal, workspace, dan riwayat project.',
-            icon: Icons.assignment_rounded,
-          ),
+        const _MainNavItem(
+          page: OwnerProposalPage(),
           destination: NavigationDestination(
             icon: Icon(Icons.assignment_outlined),
             selectedIcon: Icon(Icons.assignment_rounded),
             label: 'Aktivitas',
           ),
         ),
-        _MainNavItem(
+        const _MainNavItem(
           page: _ProfilePlaceholderPage(),
           destination: NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -125,8 +122,8 @@ class _MainShellState extends State<MainShell> {
       ];
     }
 
-    return const [
-      _MainNavItem(
+    return [
+      const _MainNavItem(
         page: _PlaceholderPage(
           title: 'Home',
           description:
@@ -139,19 +136,15 @@ class _MainShellState extends State<MainShell> {
           label: 'Home',
         ),
       ),
-      _MainNavItem(
-        page: _PlaceholderPage(
-          title: 'Cari Project',
-          description: 'Lihat daftar project yang tersedia untuk freelancer.',
-          icon: Icons.search_rounded,
-        ),
+      const _MainNavItem(
+        page: ProjectListPage(),
         destination: NavigationDestination(
           icon: Icon(Icons.search_outlined),
           selectedIcon: Icon(Icons.search_rounded),
           label: 'Project',
         ),
       ),
-      _MainNavItem(
+      const _MainNavItem(
         page: _PlaceholderPage(
           title: 'Chat',
           description: 'Diskusi project antara project owner dan freelancer.',
@@ -163,7 +156,7 @@ class _MainShellState extends State<MainShell> {
           label: 'Chat',
         ),
       ),
-      _MainNavItem(
+      const _MainNavItem(
         page: _PlaceholderPage(
           title: 'Aktivitas',
           description:
@@ -176,7 +169,7 @@ class _MainShellState extends State<MainShell> {
           label: 'Aktivitas',
         ),
       ),
-      _MainNavItem(
+      const _MainNavItem(
         page: _ProfilePlaceholderPage(),
         destination: NavigationDestination(
           icon: Icon(Icons.person_outline),
