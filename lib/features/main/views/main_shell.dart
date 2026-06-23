@@ -9,6 +9,7 @@ import '../../projects/views/create_project_page.dart';
 import '../../projects/views/project_list_page.dart';
 import '../../workspaces/views/workspace_list_page.dart';
 import 'owner_activity_page.dart';
+import '../../profiles/views/profile_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -112,8 +113,8 @@ class _MainShellState extends State<MainShell> {
             label: 'Aktivitas',
           ),
         ),
-        const _MainNavItem(
-          page: _ProfilePlaceholderPage(),
+        _MainNavItem(
+          page: ProfilePage(onLogout: _logout),
           destination: NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person_rounded),
@@ -165,8 +166,8 @@ class _MainShellState extends State<MainShell> {
           label: 'Aktivitas',
         ),
       ),
-      const _MainNavItem(
-        page: _ProfilePlaceholderPage(),
+      _MainNavItem(
+        page: ProfilePage(onLogout: _logout),
         destination: NavigationDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person_rounded),

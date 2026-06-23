@@ -9,6 +9,7 @@ import '../controllers/workspace_controller.dart';
 import '../models/workspace_model.dart';
 import '../widgets/workspace_info_section.dart';
 import '../widgets/workspace_status_badge.dart';
+import '../../reviews/views/create_review_page.dart';
 
 class WorkspaceDetailPage extends StatefulWidget {
   final String workspaceId;
@@ -261,6 +262,29 @@ class _WorkspaceDetailPageState extends State<WorkspaceDetailPage> {
                   icon: const Icon(Icons.check_circle_outline_rounded),
                   label: const Text('Selesaikan Project'),
                 ),
+              if (widget.isOwner && workspace.isCompleted) ...[
+                const SizedBox(height: AppSpacing.md),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final reviewed = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CreateReviewPage(workspace: workspace),
+                      ),
+                    );
+
+                    if (reviewed == true) {
+                      await _loadWorkspace();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.star_rounded),
+                  label: const Text('Beri Review & Rating'),
+                ),
+              ],
             ],
           );
         },
