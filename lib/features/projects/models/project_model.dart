@@ -38,7 +38,8 @@ class ProjectModel {
 
     // Ambil nama owner dari relasi profiles
     final ownerMap = json['profiles'] as Map<String, dynamic>?;
-    final ownerName = ownerMap?['full_name'] as String?;
+    final ownerName =
+        ownerMap?['name'] as String? ?? ownerMap?['full_name'] as String?;
 
     return ProjectModel(
       id: json['id'] as String?,

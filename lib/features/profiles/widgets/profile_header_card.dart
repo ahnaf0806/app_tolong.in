@@ -1,4 +1,3 @@
-import 'package:app_tolongin/features/profiles/models/profile_model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -32,7 +31,7 @@ class ProfileHeaderCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 48,
-                backgroundColor: Colors.white.withOpacity(0.18),
+                backgroundColor: Colors.white.withValues(alpha: 0.18),
                 backgroundImage:
                     profile.photoUrl == null || profile.photoUrl!.isEmpty
                     ? null
@@ -83,7 +82,7 @@ class ProfileHeaderCard extends StatelessWidget {
           Text(
             profile.email,
             style: AppTextStyles.bodySm.copyWith(
-              color: Colors.white.withOpacity(0.86),
+              color: Colors.white.withValues(alpha: 0.86),
             ),
             textAlign: TextAlign.center,
           ),
@@ -94,7 +93,7 @@ class ProfileHeaderCard extends StatelessWidget {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -165,7 +164,7 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: AppTextStyles.caption.copyWith(
-            color: Colors.white.withOpacity(0.75),
+            color: Colors.white.withValues(alpha: 0.75),
           ),
         ),
       ],

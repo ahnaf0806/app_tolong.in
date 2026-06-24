@@ -13,7 +13,7 @@ class DifficultySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selectedDifficulty,
+      initialValue: selectedDifficulty,
       decoration: const InputDecoration(
         labelText: 'Tingkat Kesulitan',
         border: OutlineInputBorder(),

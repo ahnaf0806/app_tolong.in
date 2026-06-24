@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../models/owner_proposal_item.dart';
 import '../models/proposal_model.dart';
+import '../models/my_proposal_item.dart';
 
 class ProposalService {
   SupabaseClient get _client => SupabaseService.client;
@@ -197,6 +198,53 @@ class ProposalService {
         ...map,
         'freelancer_name': freelancerNameMap[freelancerId] ?? 'Freelancer',
       });
+    }).toList();
+  }
+
+  Future<List<MyProposalItem>> getMyProposals() async {
+    final freelancerId = getCurrentUserId();
+
+    final proposalRows = await _client
+        .from('proposals')
+        .select(
+          'id, project_id, freelancer_id, message, price, estimated_time, work_method, status, created_at',
+        )
+        .eq('freelancer_id', freelancerId)
+        .order('created_at', ascending: false);
+
+    final proposals = proposalRows as List;
+
+    if (proposals.isEmpty) {
+      return [];
+    }
+
+    final projectIds = proposals
+        .map((item) => item['project_id'] as String)
+        .toSet()
+        .toList();
+
+    final projectRows = await _client
+        .from('projects')
+        .select('id, title, status')
+        .inFilter('id', projectIds);
+
+    final projects = projectRows as List;
+
+    final projectMap = {
+      for (final project in projects)
+        project['id'] as String: project as Map<String, dynamic>,
+    };
+
+    return proposals.map((item) {
+      final proposal = item as Map<String, dynamic>;
+      final projectId = proposal['project_id'] as String;
+      final project = projectMap[projectId];
+
+      return MyProposalItem.fromMaps(
+        proposal: proposal,
+        projectTitle: project?['title'] as String? ?? 'Project',
+        projectStatus: project?['status'] as String? ?? '-',
+      );
     }).toList();
   }
 }

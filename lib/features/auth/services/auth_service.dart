@@ -30,7 +30,7 @@ class AuthService {
       metadata.addAll({
         'university': university?.trim(),
         'study_program': studyProgram?.trim(),
-        'semester': semester?.toString(),
+        'semester': semester,
       });
     }
 

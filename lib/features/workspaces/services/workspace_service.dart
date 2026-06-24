@@ -22,7 +22,8 @@ class WorkspaceService {
     final response = await _client
         .from('project_workspaces')
         .select(
-            'id, project_id, owner_id, freelancer_id, proposal_id, status, result_file_url, started_at, completed_at, created_at, projects!inner(title, description), owner:profiles!owner_id(name), freelancer:profiles!freelancer_id(name)')
+          'id, project_id, owner_id, freelancer_id, proposal_id, status, result_file_url, started_at, completed_at, created_at, projects!inner(title, description), owner:profiles!owner_id(name), freelancer:profiles!freelancer_id(name)',
+        )
         .or('owner_id.eq.$userId,freelancer_id.eq.$userId')
         .order('started_at', ascending: false);
 
@@ -39,7 +40,8 @@ class WorkspaceService {
     final response = await _client
         .from('project_workspaces')
         .select(
-            'id, project_id, owner_id, freelancer_id, proposal_id, status, result_file_url, started_at, completed_at, created_at, projects!inner(title, description), owner:profiles!owner_id(name), freelancer:profiles!freelancer_id(name)')
+          'id, project_id, owner_id, freelancer_id, proposal_id, status, result_file_url, started_at, completed_at, created_at, projects!inner(title, description), owner:profiles!owner_id(name), freelancer:profiles!freelancer_id(name)',
+        )
         .eq('id', workspaceId)
         .or('owner_id.eq.$userId,freelancer_id.eq.$userId')
         .maybeSingle();
@@ -59,10 +61,7 @@ class WorkspaceService {
 
     await _client
         .from('project_workspaces')
-        .update({
-          'status': 'submitted',
-          'result_file_url': resultFileUrl,
-        })
+        .update({'status': 'submitted', 'result_file_url': resultFileUrl})
         .eq('id', workspaceId)
         .eq('freelancer_id', userId)
         .eq('status', 'active');

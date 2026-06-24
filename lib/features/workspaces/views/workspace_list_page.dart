@@ -1,13 +1,15 @@
-import 'package:app_tolongin/features/workspaces/views/workspace_detail_page.dart';
+import 'package:app_tolongin/core/widgets/app_empety_state.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_error_state.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../controllers/workspace_controller.dart';
 import '../models/workspace_model.dart';
 import '../widgets/workspace_card.dart';
+import 'workspace_detail_page.dart';
 
 class WorkspaceListPage extends StatefulWidget {
   const WorkspaceListPage({super.key});
@@ -33,6 +35,7 @@ class _WorkspaceListPageState extends State<WorkspaceListPage> {
 
   Future<void> _loadWorkspaces() async {
     await _controller.loadWorkspaces();
+
     if (mounted) {
       setState(() {});
     }
@@ -60,6 +63,7 @@ class _WorkspaceListPageState extends State<WorkspaceListPage> {
         return RefreshIndicator(
           onRefresh: _onRefresh,
           child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(AppSpacing.xl),
             children: [
               Text('Workspace', style: AppTextStyles.headingLg),
@@ -70,11 +74,22 @@ class _WorkspaceListPageState extends State<WorkspaceListPage> {
               ),
               const SizedBox(height: AppSpacing.xl),
               if (_controller.isLoading)
-                const Center(child: LoadingIndicator())
+                const Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.xl),
+                  child: Center(child: LoadingIndicator()),
+                )
               else if (_controller.errorMessage != null)
-                _buildErrorState()
+                AppErrorState(
+                  message: _controller.errorMessage!,
+                  onRetry: _loadWorkspaces,
+                )
               else if (_controller.workspaces.isEmpty)
-                _buildEmptyState()
+                const AppEmptyState(
+                  icon: Icons.work_outline_rounded,
+                  title: 'Belum Ada Workspace',
+                  message:
+                      'Workspace akan dibuat otomatis setelah proposal diterima.',
+                )
               else
                 _buildWorkspaceList(),
             ],
@@ -84,64 +99,14 @@ class _WorkspaceListPageState extends State<WorkspaceListPage> {
     );
   }
 
-  Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline_rounded,
-            size: 48,
-            color: AppColors.critical,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text('Gagal memuat workspace', style: AppTextStyles.headingSm),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            _controller.errorMessage!,
-            style: AppTextStyles.bodyMd.copyWith(color: AppColors.stone),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ElevatedButton(
-            onPressed: _loadWorkspaces,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-            ),
-            child: const Text('Coba Lagi'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.work_outline_rounded, size: 64, color: AppColors.stone),
-          const SizedBox(height: AppSpacing.md),
-          Text('Belum ada workspace', style: AppTextStyles.headingSm),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Workspace akan muncul setelah proposal diterima.',
-            style: AppTextStyles.bodyMd.copyWith(color: AppColors.stone),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildWorkspaceList() {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _controller.workspaces.length,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.md),
+      separatorBuilder: (context, index) {
+        return const SizedBox(height: AppSpacing.md);
+      },
       itemBuilder: (context, index) {
         final workspace = _controller.workspaces[index];
         final userId = _controller.getCurrentUserId();

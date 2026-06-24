@@ -7,9 +7,9 @@ import '../../auth/controllers/auth_controller.dart';
 import '../../profiles/services/profile_service.dart';
 import '../../projects/views/create_project_page.dart';
 import '../../projects/views/project_list_page.dart';
-import '../../workspaces/views/workspace_list_page.dart';
 import 'owner_activity_page.dart';
 import '../../profiles/views/profile_page.dart';
+import 'freelancer_activity_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -159,7 +159,7 @@ class _MainShellState extends State<MainShell> {
         ),
       ),
       const _MainNavItem(
-        page: WorkspaceListPage(),
+        page: FreelancerActivityPage(),
         destination: NavigationDestination(
           icon: Icon(Icons.assignment_outlined),
           selectedIcon: Icon(Icons.assignment_rounded),
@@ -186,24 +186,13 @@ class _MainShellState extends State<MainShell> {
     final navItems = _getNavigationItems();
     final safeIndex = _currentIndex >= navItems.length ? 0 : _currentIndex;
     final currentPage = navItems[safeIndex].page;
-    final bool isProfilePage = currentPage is _ProfilePlaceholderPage;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tolong.in'),
-        actions: [
-          if (isProfilePage)
-            IconButton(
-              onPressed: _logout,
-              icon: const Icon(Icons.logout_rounded),
-              tooltip: 'Logout',
-            ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Tolong.in')),
       body: currentPage,
       bottomNavigationBar: NavigationBar(
         selectedIndex: safeIndex,
-        indicatorColor: AppColors.primary.withOpacity(0.12),
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
@@ -245,38 +234,6 @@ class _PlaceholderPage extends StatelessWidget {
           Text(title, style: AppTextStyles.headingLg),
           const SizedBox(height: AppSpacing.sm),
           Text(description, style: AppTextStyles.bodyMd),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfilePlaceholderPage extends StatelessWidget {
-  const _ProfilePlaceholderPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const CircleAvatar(
-            radius: 36,
-            backgroundColor: AppColors.surfaceSoft,
-            child: Icon(
-              Icons.person_rounded,
-              color: AppColors.primary,
-              size: 40,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text('Profil', style: AppTextStyles.headingLg),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Nanti halaman ini berisi data diri, skill, portofolio, rating, dan riwayat project.',
-            style: AppTextStyles.bodyMd,
-          ),
         ],
       ),
     );

@@ -6,8 +6,8 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_status_badge.dart';
 import '../models/workspace_model.dart';
-import 'workspace_status_badge.dart';
 
 class WorkspaceCard extends StatelessWidget {
   final WorkspaceModel workspace;
@@ -26,6 +26,9 @@ class WorkspaceCard extends StatelessWidget {
     final partnerName = isOwner
         ? workspace.freelancerName
         : workspace.ownerName;
+
+    final partnerLabel = isOwner ? 'Freelancer' : 'Project Owner';
+
     final startedAt = workspace.startedAt != null
         ? DateFormat('dd MMM yyyy', 'id_ID').format(workspace.startedAt!)
         : '-';
@@ -35,42 +38,9 @@ class WorkspaceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      workspace.projectTitle,
-                      style: AppTextStyles.headingSm,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.person_outline_rounded,
-                          size: 14,
-                          color: AppColors.stone,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          partnerName,
-                          style: AppTextStyles.bodySm.copyWith(
-                            color: AppColors.stone,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              WorkspaceStatusBadge(status: workspace.status),
-            ],
-          ),
+          _buildHeader(),
+          const SizedBox(height: AppSpacing.sm),
+          _buildPartnerInfo(label: partnerLabel, name: partnerName),
           const SizedBox(height: AppSpacing.sm),
           Text(
             workspace.projectDescription,
@@ -78,7 +48,7 @@ class WorkspaceCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.base),
           Row(
             children: [
               Icon(
@@ -91,25 +61,62 @@ class WorkspaceCard extends StatelessWidget {
                 'Mulai: $startedAt',
                 style: AppTextStyles.caption.copyWith(color: AppColors.stone),
               ),
+              const Spacer(),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.stone,
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppRadius.all(AppRadius.lg),
-                ),
-              ),
-              child: Text('Buka Workspace', style: AppTextStyles.captionBold),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            workspace.projectTitle,
+            style: AppTextStyles.headingSm,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        AppStatusBadge(status: workspace.status, type: 'workspace'),
+      ],
+    );
+  }
+
+  Widget _buildPartnerInfo({required String label, required String name}) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceSoft,
+        borderRadius: AppRadius.all(AppRadius.lg),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.person_outline_rounded,
+            size: 18,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            '$label: ',
+            style: AppTextStyles.caption.copyWith(color: AppColors.stone),
+          ),
+          Expanded(
+            child: Text(
+              name,
+              style: AppTextStyles.bodySm.copyWith(fontWeight: FontWeight.w700),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
