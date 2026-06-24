@@ -6,7 +6,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_error_state.dart';
 import '../../../core/widgets/app_gradient_background.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/secondary_button.dart';
 import '../controllers/profile_controller.dart';
 import '../models/profile_model.dart';
 import '../widgets/profile_edit_sheet.dart';
