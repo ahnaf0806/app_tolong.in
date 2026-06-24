@@ -10,6 +10,7 @@ import '../controllers/admin_category_controller.dart';
 import '../models/admin_category_item_model.dart';
 import '../widgets/admin_category_card.dart';
 import '../widgets/admin_category_form_sheet.dart';
+import 'admin_category_detail_page.dart';
 
 class AdminCategoriesTab extends StatefulWidget {
   const AdminCategoriesTab({super.key});
@@ -21,18 +22,13 @@ class AdminCategoriesTab extends StatefulWidget {
 class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
   final AdminCategoryController _controller = AdminCategoryController();
   final TextEditingController _searchController = TextEditingController();
-
   String _query = '';
 
   @override
   void initState() {
     super.initState();
-
     _controller.loadCategories();
-
-    _searchController.addListener(() {
-      setState(() => _query = _searchController.text);
-    });
+    _searchController.addListener(() => setState(() => _query = _searchController.text));
   }
 
   @override
@@ -42,11 +38,8 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
     super.dispose();
   }
 
-  List<AdminCategoryItemModel> get _filteredCategories {
-    return _controller.categories
-        .where((category) => category.matches(_query))
-        .toList();
-  }
+  List<AdminCategoryItemModel> get _filteredCategories =>
+      _controller.categories.where((category) => category.matches(_query)).toList();
 
   Future<void> _openForm({AdminCategoryItemModel? category}) async {
     final result = await showModalBottomSheet<AdminCategoryFormResult>(
@@ -54,13 +47,10 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
       isScrollControlled: true,
       backgroundColor: AppColors.canvas,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppRadius.xxxl),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxxl)),
       ),
       builder: (_) => AdminCategoryFormSheet(initialCategory: category),
     );
-
     if (result == null) return;
 
     if (category == null) {
@@ -79,10 +69,7 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
         isActive: result.isActive,
       );
     }
-
-    _showMessage(
-      category == null ? 'Kategori ditambahkan.' : 'Kategori diperbarui.',
-    );
+    _showMessage(category == null ? 'Kategori ditambahkan.' : 'Kategori diperbarui.');
   }
 
   Future<void> _confirmDelete(AdminCategoryItemModel category) async {
@@ -96,43 +83,40 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
               : 'Kategori ini sudah dipakai ${category.projectCount} project, sehingga tidak bisa dihapus.',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Batal')),
           FilledButton(
-            onPressed: category.canDelete
-                ? () => Navigator.of(context).pop(true)
-                : null,
+            onPressed: category.canDelete ? () => Navigator.of(context).pop(true) : null,
             child: const Text('Hapus'),
           ),
         ],
       ),
     );
-
     if (isConfirmed != true) return;
-
     await _controller.deleteCategory(category);
     _showMessage('Kategori dihapus.');
   }
 
-  Future<void> _toggleActive(AdminCategoryItemModel category) async {
-    await _controller.toggleCategory(category);
-
-    _showMessage(
-      category.isActive ? 'Kategori dinonaktifkan.' : 'Kategori diaktifkan.',
-    );
+  void _openDetail(AdminCategoryItemModel category) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => AdminCategoryDetailPage(
+              categoryId: category.id,
+              initialName: category.name,
+            ),
+          ),
+        )
+        .then((_) => _controller.loadCategories());
   }
 
-  Future<void> _refresh() async {
-    await _controller.loadCategories();
+  Future<void> _toggleActive(AdminCategoryItemModel category) async {
+    await _controller.toggleCategory(category);
+    _showMessage(category.isActive ? 'Kategori dinonaktifkan.' : 'Kategori diaktifkan.');
   }
 
   void _showMessage(String message) {
     if (!mounted) return;
-
     final error = _controller.errorMessage;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(error ?? message),
@@ -148,12 +132,11 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
       animation: _controller,
       builder: (context, _) {
         final categories = _filteredCategories;
-
         return Stack(
           children: [
             RefreshIndicator(
               color: AppColors.primary,
-              onRefresh: _refresh,
+              onRefresh: _controller.loadCategories,
               child: ListView(
                 padding: const EdgeInsets.all(AppSpacing.xl),
                 children: [
@@ -162,16 +145,9 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
                   _buildSearch(),
                   const SizedBox(height: AppSpacing.lg),
                   if (_controller.isLoading && _controller.categories.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: AppSpacing.xxxl),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_controller.errorMessage != null &&
-                      _controller.categories.isEmpty)
-                    AppErrorState(
-                      message: _controller.errorMessage!,
-                      onRetry: _refresh,
-                    )
+                    const Center(child: CircularProgressIndicator())
+                  else if (_controller.errorMessage != null && _controller.categories.isEmpty)
+                    AppErrorState(message: _controller.errorMessage!, onRetry: _controller.loadCategories)
                   else if (categories.isEmpty)
                     _buildEmptyState()
                   else
@@ -179,8 +155,7 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
                 ],
               ),
             ),
-            if (_controller.isActionLoading)
-              const LinearProgressIndicator(minHeight: 2),
+            if (_controller.isActionLoading) const LinearProgressIndicator(minHeight: 2),
           ],
         );
       },
@@ -200,18 +175,11 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Manajemen Kategori',
-                  style: AppTextStyles.headingSm.copyWith(
-                    color: AppColors.canvas,
-                  ),
-                ),
+                Text('Manajemen Kategori', style: AppTextStyles.headingSm.copyWith(color: AppColors.canvas)),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Atur kategori project yang tampil pada marketplace dan form buat project.',
-                  style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.canvas.withValues(alpha: 0.80),
-                  ),
+                  style: AppTextStyles.bodySm.copyWith(color: AppColors.canvas.withValues(alpha: 0.80)),
                 ),
               ],
             ),
@@ -254,6 +222,7 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
         padding: const EdgeInsets.only(bottom: AppSpacing.md),
         child: AdminCategoryCard(
           category: category,
+          onTap: () => _openDetail(category),
           onEdit: () => _openForm(category: category),
           onToggleActive: () => _toggleActive(category),
           onDelete: () => _confirmDelete(category),
@@ -264,11 +233,7 @@ class _AdminCategoriesTabState extends State<AdminCategoriesTab> {
 
   Widget _buildEmptyState() {
     return AppCard(
-      child: Text(
-        'Kategori tidak ditemukan.',
-        style: AppTextStyles.bodySm,
-        textAlign: TextAlign.center,
-      ),
+      child: Text('Kategori tidak ditemukan.', style: AppTextStyles.bodySm, textAlign: TextAlign.center),
     );
   }
 }

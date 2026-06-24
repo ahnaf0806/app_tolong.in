@@ -5,17 +5,19 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_error_state.dart';
 import '../controllers/admin_dashboard_controller.dart';
-import 'admin_overview_tab.dart';
-import 'admin_projects_tab.dart';
-import 'admin_reports_tab.dart';
-import 'admin_users_tab.dart';
-import 'admin_categories_tab.dart';
-import '../models/admin_report_item_model.dart';
-import 'admin_report_detail_page.dart';
-import '../models/admin_user_item_model.dart';
-import 'admin_user_detail_page.dart';
 import '../models/admin_project_item_model.dart';
+import '../models/admin_report_item_model.dart';
+import '../models/admin_user_item_model.dart';
+import 'admin_categories_tab.dart';
+import 'admin_logs_tab.dart';
+import 'admin_moderation_tab.dart';
+import 'admin_overview_tab.dart';
 import 'admin_project_detail_page.dart';
+import 'admin_projects_tab.dart';
+import 'admin_report_detail_page.dart';
+import 'admin_reports_tab.dart';
+import 'admin_user_detail_page.dart';
+import 'admin_users_tab.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -32,8 +34,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   @override
   void initState() {
     super.initState();
-
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
     _controller.loadDashboard();
   }
 
@@ -42,18 +43,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
     _tabController.dispose();
     _controller.dispose();
     super.dispose();
-  }
-
-  Future<void> _refresh() async {
-    await _controller.refresh();
-  }
-
-  void _showActionMessage(String message) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-    );
   }
 
   Future<void> _changeReportStatus(String reportId, String status) async {
@@ -118,6 +107,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         .then((_) => _controller.loadDashboard());
   }
 
+  void _showActionMessage(String message) {
+    if (!mounted) return;
+    final error = _controller.errorMessage;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error ?? message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: error == null ? null : AppColors.critical,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -135,16 +136,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         }
 
         final stats = _controller.stats;
-
-        if (stats == null) {
-          return const SizedBox.shrink();
-        }
+        if (stats == null) return const SizedBox.shrink();
 
         return Column(
           children: [
             _buildHeader(),
-            if (_controller.isActionLoading)
-              const LinearProgressIndicator(minHeight: 2),
+            if (_controller.isActionLoading) const LinearProgressIndicator(minHeight: 2),
             TabBar(
               controller: _tabController,
               isScrollable: true,
@@ -154,39 +151,43 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
               labelStyle: AppTextStyles.bodySmBold,
               tabs: const [
                 Tab(text: 'Overview'),
-                Tab(text: 'Report'),
-                Tab(text: 'User'),
-                Tab(text: 'Project'),
-                Tab(text: 'Kategori'),
+                Tab(text: 'Moderation'),
+                Tab(text: 'Reports'),
+                Tab(text: 'Users'),
+                Tab(text: 'Projects'),
+                Tab(text: 'Categories'),
+                Tab(text: 'Logs'),
               ],
             ),
             Expanded(
-              child: RefreshIndicator(
-                color: AppColors.primary,
-                onRefresh: _refresh,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    AdminOverviewTab(stats: stats),
-                    AdminReportsTab(
-                      reports: _controller.reports,
-                      onChangeStatus: _changeReportStatus,
-                      onOpenReport: _openReportDetail,
-                    ),
-                    AdminUsersTab(
-                      users: _controller.users,
-                      onChangeUserStatus: _changeUserStatus,
-                      onChangeVerification: _changeVerification,
-                      onOpenUser: _openUserDetail,
-                    ),
-                    AdminProjectsTab(
-                      projects: _controller.projects,
-                      onChangeStatus: _changeProjectStatus,
-                      onOpenProject: _openProjectDetail,
-                    ),
-                    const AdminCategoriesTab(),
-                  ],
-                ),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  RefreshIndicator(
+                    color: AppColors.primary,
+                    onRefresh: _controller.refresh,
+                    child: AdminOverviewTab(stats: stats),
+                  ),
+                  const AdminModerationTab(),
+                  AdminReportsTab(
+                    reports: _controller.reports,
+                    onChangeStatus: _changeReportStatus,
+                    onOpenReport: _openReportDetail,
+                  ),
+                  AdminUsersTab(
+                    users: _controller.users,
+                    onChangeUserStatus: _changeUserStatus,
+                    onChangeVerification: _changeVerification,
+                    onOpenUser: _openUserDetail,
+                  ),
+                  AdminProjectsTab(
+                    projects: _controller.projects,
+                    onChangeStatus: _changeProjectStatus,
+                    onOpenProject: _openProjectDetail,
+                  ),
+                  const AdminCategoriesTab(),
+                  const AdminLogsTab(),
+                ],
               ),
             ),
           ],
@@ -205,14 +206,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.admin_panel_settings_rounded,
-            color: AppColors.primary,
-          ),
+          const Icon(Icons.admin_panel_settings_rounded, color: AppColors.primary),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text('Admin Dashboard', style: AppTextStyles.subtitleLg),
-          ),
+          Expanded(child: Text('Admin Dashboard', style: AppTextStyles.subtitleLg)),
           IconButton(
             onPressed: _controller.loadDashboard,
             icon: const Icon(Icons.refresh_rounded),

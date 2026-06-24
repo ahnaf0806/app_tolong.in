@@ -261,19 +261,11 @@ class _ReportProjectSheetState extends State<ReportProjectSheet> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Radio<String>(
-                value: reason.value,
-                groupValue: _selectedReason,
-                activeColor: AppColors.primary,
-                onChanged: _isSubmitting
-                    ? null
-                    : (value) {
-                        if (value == null) return;
-
-                        setState(() {
-                          _selectedReason = value;
-                        });
-                      },
+              Icon(
+                isSelected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_off_rounded,
+                color: isSelected ? AppColors.primary : AppColors.stone,
               ),
               const SizedBox(width: AppSpacing.xs),
               Expanded(

@@ -211,32 +211,3 @@ class _MainNavItem {
 
   const _MainNavItem({required this.page, required this.destination});
 }
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-
-  const _PlaceholderPage({
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 48, color: AppColors.primary),
-          const SizedBox(height: AppSpacing.lg),
-          Text(title, style: AppTextStyles.headingLg),
-          const SizedBox(height: AppSpacing.sm),
-          Text(description, style: AppTextStyles.bodyMd),
-        ],
-      ),
-    );
-  }
-}

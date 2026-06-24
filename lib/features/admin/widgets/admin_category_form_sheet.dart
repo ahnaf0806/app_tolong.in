@@ -132,7 +132,7 @@ class _AdminCategoryFormSheetState extends State<AdminCategoryFormSheet> {
                 const SizedBox(height: AppSpacing.md),
                 SwitchListTile(
                   value: _isActive,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'Kategori aktif',

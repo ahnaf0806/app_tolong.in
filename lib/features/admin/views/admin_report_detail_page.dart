@@ -6,16 +6,16 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
 import '../models/admin_report_item_model.dart';
+import '../widgets/admin_action_button.dart';
+import '../widgets/admin_confirm_dialog.dart';
 import '../widgets/admin_info_row.dart';
 import '../widgets/admin_status_chip.dart';
 
 class AdminReportDetailPage extends StatelessWidget {
   final AdminReportItemModel report;
-  final Future<void> Function(String reportId, String status)
-  onChangeReportStatus;
+  final Future<void> Function(String reportId, String status) onChangeReportStatus;
   final Future<void> Function(String userId, String status) onChangeUserStatus;
-  final Future<void> Function(String projectId, String status)
-  onChangeProjectStatus;
+  final Future<void> Function(String projectId, String status) onChangeProjectStatus;
 
   const AdminReportDetailPage({
     super.key,
@@ -64,18 +64,11 @@ class AdminReportDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  report.reasonLabel,
-                  style: AppTextStyles.headingSm.copyWith(
-                    color: AppColors.canvas,
-                  ),
-                ),
+                Text(report.reasonLabel, style: AppTextStyles.headingSm.copyWith(color: AppColors.canvas)),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Tinjau laporan sebelum mengambil tindakan moderasi.',
-                  style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.canvas.withValues(alpha: 0.78),
-                  ),
+                  style: AppTextStyles.bodySm.copyWith(color: AppColors.canvas.withValues(alpha: 0.78)),
                 ),
               ],
             ),
@@ -96,34 +89,16 @@ class AdminReportDetailPage extends StatelessWidget {
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
-              AdminStatusChip(
-                label: report.reasonLabel,
-                tone: report.reason == 'permintaan_joki_tugas'
-                    ? 'danger'
-                    : 'warning',
-              ),
-              AdminStatusChip(
-                label: report.statusLabel,
-                tone: _reportStatusTone(report.status),
-              ),
+              AdminStatusChip(label: report.reasonLabel, tone: report.reason == 'permintaan_joki_tugas' ? 'danger' : 'warning'),
+              AdminStatusChip(label: report.statusLabel, tone: _reportStatusTone(report.status)),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          AdminInfoRow(
-            label: 'Tanggal laporan',
-            value: date,
-            icon: Icons.schedule_rounded,
-          ),
+          AdminInfoRow(label: 'Tanggal laporan', value: date, icon: Icons.schedule_rounded),
           const Divider(height: AppSpacing.xl),
           Text('Deskripsi Laporan', style: AppTextStyles.bodyMdBold),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            report.description,
-            style: AppTextStyles.bodySm.copyWith(
-              color: AppColors.charcoal,
-              height: 1.45,
-            ),
-          ),
+          Text(report.description, style: AppTextStyles.bodySm.copyWith(color: AppColors.charcoal, height: 1.45)),
         ],
       ),
     );
@@ -136,16 +111,8 @@ class AdminReportDetailPage extends StatelessWidget {
         children: [
           _sectionTitle('Project Dilaporkan'),
           const SizedBox(height: AppSpacing.md),
-          AdminInfoRow(
-            label: 'Judul project',
-            value: report.projectTitle,
-            icon: Icons.folder_copy_rounded,
-          ),
-          AdminInfoRow(
-            label: 'Project ID',
-            value: report.projectId ?? '-',
-            icon: Icons.tag_rounded,
-          ),
+          AdminInfoRow(label: 'Judul project', value: report.projectTitle, icon: Icons.folder_copy_rounded),
+          AdminInfoRow(label: 'Project ID', value: report.projectId ?? '-', icon: Icons.tag_rounded),
         ],
       ),
     );
@@ -159,30 +126,12 @@ class AdminReportDetailPage extends StatelessWidget {
           _sectionTitle('User Terkait'),
           const SizedBox(height: AppSpacing.md),
           Text('Pelapor', style: AppTextStyles.bodyMdBold),
-          const SizedBox(height: AppSpacing.xs),
-          AdminInfoRow(
-            label: 'Nama',
-            value: report.reporterName,
-            icon: Icons.person_rounded,
-          ),
-          AdminInfoRow(
-            label: 'Email',
-            value: report.reporterEmail,
-            icon: Icons.email_rounded,
-          ),
+          AdminInfoRow(label: 'Nama', value: report.reporterName, icon: Icons.person_rounded),
+          AdminInfoRow(label: 'Email', value: report.reporterEmail, icon: Icons.email_rounded),
           const Divider(height: AppSpacing.xl),
           Text('Terlapor', style: AppTextStyles.bodyMdBold),
-          const SizedBox(height: AppSpacing.xs),
-          AdminInfoRow(
-            label: 'Nama',
-            value: report.reportedUserName,
-            icon: Icons.person_off_rounded,
-          ),
-          AdminInfoRow(
-            label: 'Email',
-            value: report.reportedUserEmail,
-            icon: Icons.email_rounded,
-          ),
+          AdminInfoRow(label: 'Nama', value: report.reportedUserName, icon: Icons.person_off_rounded),
+          AdminInfoRow(label: 'Email', value: report.reportedUserEmail, icon: Icons.email_rounded),
         ],
       ),
     );
@@ -200,85 +149,46 @@ class AdminReportDetailPage extends StatelessWidget {
             style: AppTextStyles.bodySm.copyWith(color: AppColors.charcoal),
           ),
           const SizedBox(height: AppSpacing.lg),
-          _ActionButton(
+          AdminActionButton(
             icon: Icons.visibility_rounded,
             label: 'Tandai Laporan Ditinjau',
             color: AppColors.primary,
-            onTap: () => _confirmAction(
-              context: context,
-              title: 'Tandai laporan ditinjau?',
-              message: 'Status laporan akan berubah menjadi Ditinjau.',
-              action: () => onChangeReportStatus(report.id, 'reviewed'),
-            ),
+            onTap: () => _runAction(context, 'Tandai laporan ditinjau?', 'Status laporan akan berubah menjadi Ditinjau.', () => onChangeReportStatus(report.id, 'reviewed')),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _ActionButton(
+          AdminActionButton(
             icon: Icons.check_circle_rounded,
             label: 'Tandai Laporan Selesai',
             color: AppColors.success,
-            onTap: () => _confirmAction(
-              context: context,
-              title: 'Selesaikan laporan?',
-              message: 'Status laporan akan berubah menjadi Selesai.',
-              action: () => onChangeReportStatus(report.id, 'resolved'),
-            ),
+            onTap: () => _runAction(context, 'Selesaikan laporan?', 'Status laporan akan berubah menjadi Selesai.', () => onChangeReportStatus(report.id, 'resolved')),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _ActionButton(
+          AdminActionButton(
             icon: Icons.warning_amber_rounded,
             label: 'Beri Peringatan ke User Terlapor',
             color: AppColors.warning,
-            onTap: report.reportedUserId == null
-                ? null
-                : () => _confirmAction(
-                    context: context,
-                    title: 'Beri peringatan?',
-                    message:
-                        'Status akun user terlapor akan menjadi Peringatan.',
-                    action: () =>
-                        onChangeUserStatus(report.reportedUserId!, 'warned'),
-                  ),
+            onTap: report.reportedUserId == null ? null : () => _runAction(context, 'Beri peringatan?', 'Status akun user terlapor akan menjadi Peringatan.', () => onChangeUserStatus(report.reportedUserId!, 'warned')),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _ActionButton(
+          AdminActionButton(
             icon: Icons.block_rounded,
             label: 'Blokir User Terlapor',
             color: AppColors.critical,
-            onTap: report.reportedUserId == null
-                ? null
-                : () => _confirmAction(
-                    context: context,
-                    title: 'Blokir user?',
-                    message:
-                        'User terlapor akan diblokir. Pastikan laporan benar-benar valid.',
-                    action: () =>
-                        onChangeUserStatus(report.reportedUserId!, 'blocked'),
-                  ),
+            onTap: report.reportedUserId == null ? null : () => _runAction(context, 'Blokir user?', 'Pastikan laporan valid sebelum memblokir akun.', () => onChangeUserStatus(report.reportedUserId!, 'blocked')),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _ActionButton(
+          AdminActionButton(
             icon: Icons.cancel_rounded,
             label: 'Batalkan Project Bermasalah',
             color: AppColors.criticalStrong,
-            onTap: report.projectId == null
-                ? null
-                : () => _confirmAction(
-                    context: context,
-                    title: 'Batalkan project?',
-                    message:
-                        'Project akan diubah menjadi dibatalkan dan tidak lagi berjalan normal.',
-                    action: () =>
-                        onChangeProjectStatus(report.projectId!, 'cancelled'),
-                  ),
+            onTap: report.projectId == null ? null : () => _runAction(context, 'Batalkan project?', 'Project akan diubah menjadi dibatalkan.', () => onChangeProjectStatus(report.projectId!, 'cancelled')),
           ),
         ],
       ),
     );
   }
 
-  Widget _sectionTitle(String title) {
-    return Text(title, style: AppTextStyles.subtitleLg);
-  }
+  Widget _sectionTitle(String title) => Text(title, style: AppTextStyles.subtitleLg);
 
   String _reportStatusTone(String status) {
     if (status == 'resolved') return 'success';
@@ -286,99 +196,20 @@ class AdminReportDetailPage extends StatelessWidget {
     return 'warning';
   }
 
-  Future<void> _confirmAction({
-    required BuildContext context,
-    required String title,
-    required String message,
-    required Future<void> Function() action,
-  }) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Lanjutkan'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
+  Future<void> _runAction(
+    BuildContext context,
+    String title,
+    String message,
+    Future<void> Function() action,
+  ) async {
+    final confirmed = await AdminConfirmDialog.show(context: context, title: title, message: message);
+    if (!confirmed) return;
     await action();
-
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Aksi moderasi berhasil diproses.'),
-          behavior: SnackBarBehavior.floating,
-        ),
+        const SnackBar(content: Text('Aksi moderasi berhasil diproses.'), behavior: SnackBarBehavior.floating),
       );
       Navigator.of(context).pop();
     }
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final disabled = onTap == null;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.base),
-        decoration: BoxDecoration(
-          color: disabled
-              ? AppColors.surfaceSoft
-              : color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: disabled
-                ? AppColors.hairlineSoft
-                : color.withValues(alpha: 0.26),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: disabled ? AppColors.stone : color),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.bodySmBold.copyWith(
-                  color: disabled ? AppColors.stone : color,
-                ),
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: disabled ? AppColors.stone : color,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

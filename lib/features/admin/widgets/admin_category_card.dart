@@ -12,6 +12,7 @@ class AdminCategoryCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onToggleActive;
   final VoidCallback onDelete;
+  final VoidCallback? onTap;
 
   const AdminCategoryCard({
     super.key,
@@ -19,11 +20,13 @@ class AdminCategoryCard extends StatelessWidget {
     required this.onEdit,
     required this.onToggleActive,
     required this.onDelete,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,26 +38,18 @@ class AdminCategoryCard extends StatelessWidget {
                 tone: category.isActive ? 'success' : 'danger',
               ),
               const SizedBox(width: AppSpacing.xs),
-              AdminStatusChip(
-                label: 'Urutan ${category.displayOrder}',
-                tone: 'primary',
-              ),
+              AdminStatusChip(label: 'Urutan ${category.displayOrder}', tone: 'primary'),
               const Spacer(),
+              const Icon(Icons.open_in_new_rounded, size: 18, color: AppColors.stone),
               PopupMenuButton<String>(
                 onSelected: _handleAction,
                 itemBuilder: (_) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Text('Edit Kategori'),
-                  ),
+                  const PopupMenuItem(value: 'edit', child: Text('Edit Kategori')),
                   PopupMenuItem(
                     value: 'toggle',
                     child: Text(category.isActive ? 'Nonaktifkan' : 'Aktifkan'),
                   ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Hapus Kategori'),
-                  ),
+                  const PopupMenuItem(value: 'delete', child: Text('Hapus Kategori')),
                 ],
               ),
             ],
@@ -78,11 +73,7 @@ class AdminCategoryCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              const Icon(
-                Icons.folder_copy_outlined,
-                size: 18,
-                color: AppColors.stone,
-              ),
+              const Icon(Icons.folder_copy_outlined, size: 18, color: AppColors.stone),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
@@ -106,16 +97,8 @@ class AdminCategoryCard extends StatelessWidget {
   }
 
   void _handleAction(String value) {
-    switch (value) {
-      case 'edit':
-        onEdit();
-        break;
-      case 'toggle':
-        onToggleActive();
-        break;
-      case 'delete':
-        onDelete();
-        break;
-    }
+    if (value == 'edit') onEdit();
+    if (value == 'toggle') onToggleActive();
+    if (value == 'delete') onDelete();
   }
 }
