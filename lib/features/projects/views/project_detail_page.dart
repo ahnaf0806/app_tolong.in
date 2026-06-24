@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../proposals/views/create_proposal_page.dart';
 import '../models/project_model.dart';
+import '../../reports/widgets/report_project_sheet.dart';
 
 /// Halaman detail project untuk freelancer.
 /// Menampilkan seluruh informasi project dan tombol Ajukan Proposal.
@@ -117,29 +118,84 @@ class ProjectDetailPage extends StatelessWidget {
             AppSpacing.xl,
             AppSpacing.xl,
           ),
-          child: SizedBox(
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => CreateProposalPage(project: project),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 52,
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: project.status == 'open'
+                      ? () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  CreateProposalPage(project: project),
+                            ),
+                          );
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    disabledBackgroundColor: AppColors.disabledText,
+                    disabledForegroundColor: AppColors.canvas,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.all(AppRadius.xl),
+                    ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppRadius.all(AppRadius.xl),
+                  icon: const Icon(Icons.send_rounded, size: 18),
+                  label: Text(
+                    project.status == 'open'
+                        ? 'Ajukan Proposal'
+                        : 'Project Tidak Terbuka',
+                    style: AppTextStyles.buttonMd,
+                  ),
                 ),
               ),
-              icon: const Icon(Icons.send_rounded, size: 18),
-              label: Text('Ajukan Proposal', style: AppTextStyles.buttonMd),
-            ),
+              const SizedBox(height: AppSpacing.sm),
+              SizedBox(
+                height: 44,
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showReportSheet(context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.critical,
+                    side: const BorderSide(
+                      color: AppColors.critical,
+                      width: 1.4,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.all(AppRadius.full),
+                    ),
+                  ),
+                  icon: const Icon(Icons.flag_outlined, size: 18),
+                  label: Text(
+                    'Laporkan Project',
+                    style: AppTextStyles.buttonMd.copyWith(
+                      color: AppColors.critical,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showReportSheet(BuildContext context) {
+    showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.canvas,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxxl),
+        ),
+      ),
+      builder: (_) => ReportProjectSheet(project: project),
     );
   }
 

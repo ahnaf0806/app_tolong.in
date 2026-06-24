@@ -10,6 +10,10 @@ import '../../projects/views/project_list_page.dart';
 import 'owner_activity_page.dart';
 import '../../profiles/views/profile_page.dart';
 import 'freelancer_activity_page.dart';
+import 'home_dashboard_page.dart';
+import '../../chat/views/chat_inbox_page.dart';
+import '../../freelancers/views/freelancer_directory_page.dart';
+import '../../admin/views/admin_dashboard_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -57,15 +61,30 @@ class _MainShellState extends State<MainShell> {
   }
 
   List<_MainNavItem> _getNavigationItems() {
+    if (_currentRole == 'admin') {
+      return [
+        const _MainNavItem(
+          page: AdminDashboardPage(),
+          destination: NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard_rounded),
+            label: 'Dashboard',
+          ),
+        ),
+        _MainNavItem(
+          page: ProfilePage(onLogout: _logout),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profil',
+          ),
+        ),
+      ];
+    }
     if (_currentRole == 'project_owner') {
       return [
         const _MainNavItem(
-          page: _PlaceholderPage(
-            title: 'Home',
-            description:
-                'Ringkasan aktivitas, project terbaru, dan rekomendasi freelancer.',
-            icon: Icons.home_rounded,
-          ),
+          page: HomeDashboardPage(role: 'project_owner'),
           destination: NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
@@ -73,12 +92,7 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
         const _MainNavItem(
-          page: _PlaceholderPage(
-            title: 'Cari Freelancer',
-            description:
-                'Temukan freelancer mahasiswa berdasarkan skill, portofolio, dan rating.',
-            icon: Icons.groups_rounded,
-          ),
+          page: FreelancerDirectoryPage(),
           destination: NavigationDestination(
             icon: Icon(Icons.groups_outlined),
             selectedIcon: Icon(Icons.groups_rounded),
@@ -94,11 +108,7 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
         const _MainNavItem(
-          page: _PlaceholderPage(
-            title: 'Chat',
-            description: 'Diskusi project antara project owner dan freelancer.',
-            icon: Icons.chat_bubble_rounded,
-          ),
+          page: ChatInboxPage(),
           destination: NavigationDestination(
             icon: Icon(Icons.chat_bubble_outline),
             selectedIcon: Icon(Icons.chat_bubble_rounded),
@@ -126,12 +136,7 @@ class _MainShellState extends State<MainShell> {
 
     return [
       const _MainNavItem(
-        page: _PlaceholderPage(
-          title: 'Home',
-          description:
-              'Ringkasan aktivitas, project terbaru, dan rekomendasi project.',
-          icon: Icons.home_rounded,
-        ),
+        page: HomeDashboardPage(role: 'freelancer'),
         destination: NavigationDestination(
           icon: Icon(Icons.home_outlined),
           selectedIcon: Icon(Icons.home_rounded),
@@ -147,11 +152,7 @@ class _MainShellState extends State<MainShell> {
         ),
       ),
       const _MainNavItem(
-        page: _PlaceholderPage(
-          title: 'Chat',
-          description: 'Diskusi project antara project owner dan freelancer.',
-          icon: Icons.chat_bubble_rounded,
-        ),
+        page: ChatInboxPage(),
         destination: NavigationDestination(
           icon: Icon(Icons.chat_bubble_outline),
           selectedIcon: Icon(Icons.chat_bubble_rounded),

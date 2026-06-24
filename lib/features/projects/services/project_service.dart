@@ -11,6 +11,8 @@ class ProjectService {
     final response = await _client
         .from('project_categories')
         .select('id, name, description')
+        .eq('is_active', true)
+        .order('display_order', ascending: true)
         .order('name', ascending: true);
 
     return (response as List)
@@ -54,7 +56,6 @@ class ProjectService {
         .toList();
   }
 
-
   String getCurrentUserId() {
     final user = _client.auth.currentUser;
 
@@ -65,4 +66,3 @@ class ProjectService {
     return user.id;
   }
 }
-
