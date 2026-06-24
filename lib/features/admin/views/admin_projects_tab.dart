@@ -9,11 +9,13 @@ import '../widgets/admin_project_card.dart';
 class AdminProjectsTab extends StatefulWidget {
   final List<AdminProjectItemModel> projects;
   final Future<void> Function(String projectId, String status) onChangeStatus;
+  final void Function(AdminProjectItemModel project) onOpenProject;
 
   const AdminProjectsTab({
     super.key,
     required this.projects,
     required this.onChangeStatus,
+    required this.onOpenProject,
   });
 
   @override
@@ -70,6 +72,7 @@ class _AdminProjectsTabState extends State<AdminProjectsTab> {
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: AdminProjectCard(
                 project: project,
+                onTap: () => widget.onOpenProject(project),
                 onChangeStatus: (status) {
                   widget.onChangeStatus(project.id, status);
                 },

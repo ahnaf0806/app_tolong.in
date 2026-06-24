@@ -12,6 +12,10 @@ import 'admin_users_tab.dart';
 import 'admin_categories_tab.dart';
 import '../models/admin_report_item_model.dart';
 import 'admin_report_detail_page.dart';
+import '../models/admin_user_item_model.dart';
+import 'admin_user_detail_page.dart';
+import '../models/admin_project_item_model.dart';
+import 'admin_project_detail_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -87,6 +91,33 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         .then((_) => _controller.loadDashboard());
   }
 
+  void _openUserDetail(AdminUserItemModel user) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => AdminUserDetailPage(
+              user: user,
+              onChangeUserStatus: _changeUserStatus,
+              onChangeVerification: _changeVerification,
+            ),
+          ),
+        )
+        .then((_) => _controller.loadDashboard());
+  }
+
+  void _openProjectDetail(AdminProjectItemModel project) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => AdminProjectDetailPage(
+              projectId: project.id,
+              initialTitle: project.title,
+            ),
+          ),
+        )
+        .then((_) => _controller.loadDashboard());
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -146,10 +177,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                       users: _controller.users,
                       onChangeUserStatus: _changeUserStatus,
                       onChangeVerification: _changeVerification,
+                      onOpenUser: _openUserDetail,
                     ),
                     AdminProjectsTab(
                       projects: _controller.projects,
                       onChangeStatus: _changeProjectStatus,
+                      onOpenProject: _openProjectDetail,
                     ),
                     const AdminCategoriesTab(),
                   ],

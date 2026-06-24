@@ -11,11 +11,13 @@ import 'admin_status_chip.dart';
 class AdminProjectCard extends StatelessWidget {
   final AdminProjectItemModel project;
   final ValueChanged<String> onChangeStatus;
+  final VoidCallback? onTap;
 
   const AdminProjectCard({
     super.key,
     required this.project,
     required this.onChangeStatus,
+    this.onTap,
   });
 
   @override
@@ -25,6 +27,7 @@ class AdminProjectCard extends StatelessWidget {
         : DateFormat('dd MMM yyyy', 'id_ID').format(project.deadline!);
 
     return AppCard(
+      onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,6 +44,12 @@ class AdminProjectCard extends StatelessWidget {
                   label: '${project.reportCount} laporan',
                   tone: 'danger',
                 ),
+              const SizedBox(width: AppSpacing.xs),
+              const Icon(
+                Icons.open_in_new_rounded,
+                size: 18,
+                color: AppColors.stone,
+              ),
               PopupMenuButton<String>(
                 onSelected: onChangeStatus,
                 itemBuilder: (_) => const [

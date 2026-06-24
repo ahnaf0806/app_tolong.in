@@ -11,17 +11,20 @@ class AdminUserCard extends StatelessWidget {
   final AdminUserItemModel user;
   final ValueChanged<String> onChangeAccountStatus;
   final ValueChanged<String> onChangeVerification;
+  final VoidCallback? onTap;
 
   const AdminUserCard({
     super.key,
     required this.user,
     required this.onChangeAccountStatus,
     required this.onChangeVerification,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +62,11 @@ class AdminUserCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              const Icon(
+                Icons.open_in_new_rounded,
+                size: 18,
+                color: AppColors.stone,
               ),
               PopupMenuButton<String>(
                 onSelected: onChangeAccountStatus,

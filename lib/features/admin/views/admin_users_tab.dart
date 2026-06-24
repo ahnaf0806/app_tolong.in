@@ -11,12 +11,14 @@ class AdminUsersTab extends StatefulWidget {
   final Future<void> Function(String userId, String status) onChangeUserStatus;
   final Future<void> Function(String userId, String status)
   onChangeVerification;
+  final void Function(AdminUserItemModel user) onOpenUser;
 
   const AdminUsersTab({
     super.key,
     required this.users,
     required this.onChangeUserStatus,
     required this.onChangeVerification,
+    required this.onOpenUser,
   });
 
   @override
@@ -73,6 +75,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: AdminUserCard(
                 user: user,
+                onTap: () => widget.onOpenUser(user),
                 onChangeAccountStatus: (status) {
                   widget.onChangeUserStatus(user.id, status);
                 },
