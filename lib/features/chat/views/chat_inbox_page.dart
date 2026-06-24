@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_state.dart';
+import '../../../core/widgets/premium_glass_card.dart';
+import '../../../core/widgets/premium_gradient_card.dart';
+import '../../workspaces/controllers/workspace_controller.dart';
 import '../../workspaces/models/workspace_model.dart';
-import '../../workspaces/services/workspace_service.dart';
 import 'chat_page.dart';
 
 class ChatInboxPage extends StatefulWidget {
@@ -18,121 +20,98 @@ class ChatInboxPage extends StatefulWidget {
 }
 
 class _ChatInboxPageState extends State<ChatInboxPage> {
-  final WorkspaceService _workspaceService = WorkspaceService();
-
-  bool _isLoading = true;
-  String? _errorMessage;
-  String? _currentUserId;
-  List<WorkspaceModel> _workspaces = [];
+  final WorkspaceController _controller = WorkspaceController();
 
   @override
   void initState() {
     super.initState();
-    _loadInbox();
+    _loadChats();
   }
 
-  Future<void> _loadInbox() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-    try {
-      final currentUserId = _workspaceService.getCurrentUserId();
-      final workspaces = await _workspaceService.getMyWorkspaces();
-
-      if (!mounted) return;
-
-      setState(() {
-        _currentUserId = currentUserId;
-        _workspaces = workspaces
-            .where((workspace) => workspace.id != null)
-            .where((workspace) => workspace.status != 'cancelled')
-            .toList();
-        _isLoading = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-
-      setState(() {
-        _errorMessage = error.toString();
-        _isLoading = false;
-      });
-    }
+  Future<void> _loadChats() async {
+    await _controller.loadWorkspaces();
+    if (mounted) setState(() {});
   }
 
   void _openChat(WorkspaceModel workspace) {
-    final currentUserId = _currentUserId;
-
-    if (currentUserId == null || workspace.id == null) {
-      return;
-    }
-
-    final isOwner = workspace.ownerId == currentUserId;
-    final partnerId = isOwner ? workspace.freelancerId : workspace.ownerId;
-    final partnerName = isOwner
-        ? workspace.freelancerName
-        : workspace.ownerName;
+    final userId = _controller.getCurrentUserId();
+    final isOwner = workspace.ownerId == userId;
+    final receiverId = isOwner ? workspace.freelancerId : workspace.ownerId;
+    final partnerName = isOwner ? workspace.freelancerName : workspace.ownerName;
 
     Navigator.of(context)
         .push(
           MaterialPageRoute(
             builder: (_) => ChatPage(
               workspaceId: workspace.id!,
-              receiverId: partnerId,
+              receiverId: receiverId,
               partnerName: partnerName,
             ),
           ),
         )
-        .then((_) => _loadInbox());
+        .then((_) => _loadChats());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.canvas,
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: _loadInbox,
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          children: [
-            _buildHeader(),
-            const SizedBox(height: AppSpacing.xl),
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (_errorMessage != null)
-              _buildErrorState()
-            else if (_workspaces.isEmpty)
-              _buildEmptyState()
-            else
-              ..._workspaces.map(_buildChatItem),
-          ],
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _loadChats,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            children: [
+              _buildHeader(),
+              const SizedBox(height: AppSpacing.xl),
+              if (_controller.isLoading && _controller.workspaces.isEmpty)
+                const Center(child: CircularProgressIndicator())
+              else if (_controller.errorMessage != null &&
+                  _controller.workspaces.isEmpty)
+                AppErrorState(
+                  message: _controller.errorMessage!,
+                  onRetry: _loadChats,
+                )
+              else if (_controller.workspaces.isEmpty)
+                const AppEmptyState(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  title: 'Belum ada chat',
+                  message:
+                      'Chat akan aktif otomatis setelah proposal diterima dan workspace dibuat.',
+                )
+              else
+                ..._buildChatItems(),
+              const SizedBox(height: AppSpacing.xxl),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildHeader() {
-    return AppCard(
-      backgroundColor: AppColors.inkDeep,
-      hasBorder: false,
-      radius: AppRadius.xxxl,
+    return PremiumGradientCard(
       child: Row(
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 58,
+            height: 58,
             decoration: BoxDecoration(
-              color: AppColors.canvas.withValues(alpha: 0.12),
-              borderRadius: AppRadius.all(AppRadius.full),
+              color: AppColors.canvas.withValues(alpha: 0.14),
+              borderRadius: AppRadius.all(AppRadius.xxl),
             ),
             child: const Icon(
-              Icons.chat_bubble_rounded,
+              Icons.mark_chat_unread_rounded,
               color: AppColors.canvas,
+              size: 30,
             ),
           ),
           const SizedBox(width: AppSpacing.base),
@@ -144,13 +123,14 @@ class _ChatInboxPageState extends State<ChatInboxPage> {
                   'Chat Project',
                   style: AppTextStyles.headingSm.copyWith(
                     color: AppColors.canvas,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Diskusi project yang sudah memiliki workspace aktif.',
+                  'Komunikasi langsung dengan partner project Anda.',
                   style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.canvas.withValues(alpha: 0.78),
+                    color: AppColors.canvas.withValues(alpha: 0.84),
                   ),
                 ),
               ],
@@ -161,155 +141,139 @@ class _ChatInboxPageState extends State<ChatInboxPage> {
     );
   }
 
-  Widget _buildErrorState() {
-    return AppCard(
-      backgroundColor: AppColors.critical.withValues(alpha: 0.06),
-      hasBorder: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Chat belum bisa dimuat',
-            style: AppTextStyles.bodyMdBold.copyWith(color: AppColors.critical),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            _errorMessage ?? 'Terjadi kesalahan.',
-            style: AppTextStyles.bodySm,
-          ),
-          const SizedBox(height: AppSpacing.base),
-          OutlinedButton.icon(
-            onPressed: _loadInbox,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Coba Lagi'),
-          ),
-        ],
-      ),
-    );
-  }
+  List<Widget> _buildChatItems() {
+    final items = <Widget>[];
 
-  Widget _buildEmptyState() {
-    return AppCard(
-      child: Column(
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSoft,
-              borderRadius: AppRadius.all(AppRadius.circle),
-            ),
-            child: const Icon(
-              Icons.forum_outlined,
-              color: AppColors.primary,
-              size: 34,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Belum ada percakapan',
-            style: AppTextStyles.subtitleLg,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Chat akan muncul setelah proposal diterima dan workspace project dibuat.',
-            style: AppTextStyles.bodySm,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+    for (var index = 0; index < _controller.workspaces.length; index++) {
+      final workspace = _controller.workspaces[index];
+      final userId = _controller.getCurrentUserId();
+      final isOwner = workspace.ownerId == userId;
 
-  Widget _buildChatItem(WorkspaceModel workspace) {
-    final currentUserId = _currentUserId;
-    final isOwner = workspace.ownerId == currentUserId;
-    final partnerName = isOwner
-        ? workspace.freelancerName
-        : workspace.ownerName;
+      items.add(
+        _ChatWorkspaceCard(
+          workspace: workspace,
+          isOwner: isOwner,
+          onTap: () => _openChat(workspace),
+        ),
+      );
+
+      if (index != _controller.workspaces.length - 1) {
+        items.add(const SizedBox(height: AppSpacing.md));
+      }
+    }
+
+    return items;
+  }
+}
+
+class _ChatWorkspaceCard extends StatelessWidget {
+  final WorkspaceModel workspace;
+  final bool isOwner;
+  final VoidCallback onTap;
+
+  const _ChatWorkspaceCard({
+    required this.workspace,
+    required this.isOwner,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final partnerName = isOwner ? workspace.freelancerName : workspace.ownerName;
     final partnerLabel = isOwner ? 'Freelancer' : 'Project Owner';
+    final initial = partnerName.trim().isEmpty
+        ? 'C'
+        : partnerName.trim()[0].toUpperCase();
 
-    final date = workspace.startedAt ?? workspace.createdAt;
-    final formattedDate = date == null
-        ? '-'
-        : DateFormat('dd MMM yyyy', 'id_ID').format(date);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: AppCard(
-        onTap: () => _openChat(workspace),
-        padding: const EdgeInsets.all(AppSpacing.base),
-        child: Row(
-          children: [
-            _AvatarInitial(name: partnerName),
-            const SizedBox(width: AppSpacing.base),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    partnerName,
-                    style: AppTextStyles.bodyMdBold,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+    return PremiumGlassCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 29,
+                backgroundColor: AppColors.primary.withValues(alpha: 0.10),
+                child: Text(
+                  initial,
+                  style: AppTextStyles.subtitleLg.copyWith(
+                    color: AppColors.primary,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    partnerLabel,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.stone,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    workspace.projectTitle,
-                    style: AppTextStyles.bodySm.copyWith(
-                      color: AppColors.charcoal,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              Positioned(
+                right: 1,
+                bottom: 1,
+                child: Container(
+                  width: 13,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: AppColors.success,
+                    border: Border.all(color: AppColors.canvas, width: 2),
+                    borderRadius: AppRadius.all(AppRadius.full),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(formattedDate, style: AppTextStyles.caption),
-                const SizedBox(height: AppSpacing.md),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.stone),
+                Text(
+                  workspace.projectTitle,
+                  style: AppTextStyles.bodyMdBold,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  '$partnerLabel: $partnerName',
+                  style: AppTextStyles.bodySm.copyWith(color: AppColors.stone),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                _StatusPill(status: workspace.status),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.stone),
+        ],
       ),
     );
   }
 }
 
-class _AvatarInitial extends StatelessWidget {
-  final String name;
+class _StatusPill extends StatelessWidget {
+  final String status;
 
-  const _AvatarInitial({required this.name});
+  const _StatusPill({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final initial = name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase();
+    final label = switch (status) {
+      'active' => 'Dikerjakan',
+      'submitted' => 'Menunggu konfirmasi',
+      'completed' => 'Selesai',
+      'cancelled' => 'Dibatalkan',
+      _ => status,
+    };
 
     return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.10),
-        borderRadius: AppRadius.all(AppRadius.circle),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
       ),
-      child: Center(
-        child: Text(
-          initial,
-          style: AppTextStyles.subtitleLg.copyWith(color: AppColors.primary),
-        ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: AppRadius.all(AppRadius.full),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.captionBold.copyWith(color: AppColors.primary),
       ),
     );
   }

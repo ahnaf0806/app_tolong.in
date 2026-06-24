@@ -39,7 +39,11 @@ class AppEmptyState extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: AppRadius.all(AppRadius.full),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 32),
+            child: Icon(
+              icon,
+              color: AppColors.primary,
+              size: 32,
+            ),
           ),
           const SizedBox(height: AppSpacing.base),
           Text(

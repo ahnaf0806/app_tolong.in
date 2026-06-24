@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../models/proposal_model.dart';
 
 class ProposalListCard extends StatelessWidget {
@@ -25,16 +26,9 @@ class ProposalListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.canvas,
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: AppSpacing.base),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.all(AppRadius.xl),
-        side: const BorderSide(color: AppColors.hairlineSoft),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.base),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: PremiumGlassCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -43,7 +37,7 @@ class ProposalListCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     proposal.freelancerName ?? 'Freelancer',
-                    style: AppTextStyles.bodyMdBold,
+                    style: AppTextStyles.subtitleLg,
                   ),
                 ),
                 _ProposalStatusBadge(status: proposal.status),
@@ -52,7 +46,7 @@ class ProposalListCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               proposal.message,
-              style: AppTextStyles.bodyMd,
+              style: AppTextStyles.bodySm.copyWith(color: AppColors.slate, height: 1.45),
               maxLines: 4,
               overflow: TextOverflow.ellipsis,
             ),
@@ -65,28 +59,15 @@ class ProposalListCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: isActionLoading ? null : onReject,
-                      child: const Text('Tolak'),
-                    ),
+                    child: OutlinedButton(onPressed: isActionLoading ? null : onReject, child: const Text('Tolak')),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: isActionLoading ? null : onAccept,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        foregroundColor: Colors.white,
-                      ),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white),
                       child: isActionLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                           : const Text('Terima'),
                     ),
                   ),
@@ -100,11 +81,7 @@ class ProposalListCard extends StatelessWidget {
   }
 
   String _formatCurrency(double value) {
-    return NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    ).format(value);
+    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(value);
   }
 }
 
@@ -121,7 +98,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(width: 82, child: Text(label, style: AppTextStyles.caption)),
-          Expanded(child: Text(value, style: AppTextStyles.bodySm)),
+          Expanded(child: Text(value, style: AppTextStyles.bodySmBold)),
         ],
       ),
     );
@@ -135,14 +112,14 @@ class _ProposalStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor;
-    Color textColor;
-    String label;
+    late Color backgroundColor;
+    late Color textColor;
+    late String label;
 
     switch (status.toLowerCase()) {
       case 'accepted':
         label = 'Diterima';
-        backgroundColor = const Color(0xFFE8F5EC);
+        backgroundColor = AppColors.successBg;
         textColor = AppColors.success;
         break;
       case 'rejected':
@@ -152,26 +129,14 @@ class _ProposalStatusBadge extends StatelessWidget {
         break;
       default:
         label = 'Menunggu';
-        backgroundColor = const Color(0xFFFFF4E0);
+        backgroundColor = AppColors.warningBg;
         textColor = AppColors.attention;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: AppRadius.all(AppRadius.full),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.caption.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      decoration: BoxDecoration(color: backgroundColor, borderRadius: AppRadius.all(AppRadius.full)),
+      child: Text(label, style: AppTextStyles.captionBold.copyWith(color: textColor)),
     );
   }
 }

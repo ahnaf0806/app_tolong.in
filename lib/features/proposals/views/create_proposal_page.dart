@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_gradient_background.dart';
+import '../../../core/widgets/premium_gradient_card.dart';
+import '../../../core/widgets/premium_glass_card.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../projects/models/project_model.dart';
 import '../controllers/proposal_controller.dart';
 import '../widgets/proposal_form_info_card.dart';
@@ -15,11 +23,9 @@ class CreateProposalPage extends StatefulWidget {
 
 class _CreateProposalPageState extends State<CreateProposalPage> {
   final ProposalController _controller = ProposalController();
-
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _estimatedTimeController =
-      TextEditingController();
+  final TextEditingController _estimatedTimeController = TextEditingController();
   final TextEditingController _workMethodController = TextEditingController();
 
   @override
@@ -42,105 +48,141 @@ class _CreateProposalPageState extends State<CreateProposalPage> {
       workMethod: _workMethodController.text,
     );
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Proposal berhasil dikirim.')),
       );
-
       Navigator.pop(context);
       return;
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_controller.errorMessage ?? 'Proposal gagal dikirim.'),
-      ),
+      SnackBar(content: Text(_controller.errorMessage ?? 'Proposal gagal dikirim.')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajukan Proposal')),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          return ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              Text(
-                'Ajukan Proposal',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tawarkan kemampuan terbaikmu untuk project ini.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 20),
-              ProposalFormInfoCard(project: widget.project),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _messageController,
-                maxLines: 5,
-                decoration: const InputDecoration(
-                  labelText: 'Pesan Proposal',
-                  hintText:
-                      'Jelaskan kemampuanmu, pengalaman, dan cara kamu menyelesaikan project ini.',
-                  border: OutlineInputBorder(),
+      backgroundColor: AppColors.canvas,
+      body: AppGradientBackground(
+        child: SafeArea(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              return ListView(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                children: [
+                  _buildHero(context),
+                  const SizedBox(height: AppSpacing.xl),
+                  ProposalFormInfoCard(project: widget.project),
+                  const SizedBox(height: AppSpacing.xl),
+                  PremiumGlassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Detail Proposal', style: AppTextStyles.subtitleLg),
+                        const SizedBox(height: AppSpacing.md),
+                        _input(
+                          controller: _messageController,
+                          label: 'Pesan Proposal',
+                          hint: 'Jelaskan kemampuan, pengalaman, dan cara menyelesaikan project ini.',
+                          icon: Icons.chat_bubble_outline_rounded,
+                          maxLines: 5,
+                        ),
+                        const SizedBox(height: AppSpacing.base),
+                        _input(
+                          controller: _priceController,
+                          label: 'Harga Penawaran',
+                          hint: 'Contoh: 150000',
+                          icon: Icons.payments_rounded,
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: AppSpacing.base),
+                        _input(
+                          controller: _estimatedTimeController,
+                          label: 'Estimasi Waktu',
+                          hint: 'Contoh: 3 hari',
+                          icon: Icons.schedule_rounded,
+                        ),
+                        const SizedBox(height: AppSpacing.base),
+                        _input(
+                          controller: _workMethodController,
+                          label: 'Metode Kerja',
+                          hint: 'Contoh: draft awal, revisi, lalu finalisasi.',
+                          icon: Icons.handyman_rounded,
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        PrimaryButton(
+                          text: 'Kirim Proposal',
+                          icon: Icons.send_rounded,
+                          isLoading: _controller.isLoading,
+                          variant: PrimaryButtonVariant.cobalt,
+                          onPressed: _submitProposal,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHero(BuildContext context) {
+    return PremiumGradientCard(
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.canvas),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Ajukan Proposal', style: AppTextStyles.headingSm.copyWith(color: AppColors.canvas)),
+                Text(
+                  'Tawarkan skill terbaikmu secara profesional.',
+                  style: AppTextStyles.bodySm.copyWith(color: AppColors.canvas.withValues(alpha: 0.86)),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _priceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Harga Penawaran',
-                  hintText: 'Contoh: 150000',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _estimatedTimeController,
-                decoration: const InputDecoration(
-                  labelText: 'Estimasi Waktu',
-                  hintText: 'Contoh: 3 hari',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _workMethodController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Metode Kerja',
-                  hintText:
-                      'Contoh: Saya akan membuat draft awal, revisi, lalu finalisasi.',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: _controller.isLoading ? null : _submitProposal,
-                  child: _controller.isLoading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Kirim Proposal'),
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _input({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon),
+        filled: true,
+        fillColor: AppColors.surfaceSoft,
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.all(AppRadius.xl),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_error_state.dart';
+import '../../../core/widgets/premium_gradient_card.dart';
 import '../controllers/admin_logs_controller.dart';
 import '../widgets/admin_log_card.dart';
 
@@ -51,12 +53,11 @@ class _AdminLogsTabState extends State<AdminLogsTab> {
                   onRetry: _controller.loadLogs,
                 )
               else if (_controller.logs.isEmpty)
-                AppCard(
-                  child: Text(
-                    'Belum ada aktivitas admin.',
-                    style: AppTextStyles.bodySm,
-                    textAlign: TextAlign.center,
-                  ),
+                const AppEmptyState(
+                  icon: Icons.history_rounded,
+                  title: 'Belum ada aktivitas admin',
+                  message:
+                      'Aksi moderasi dan perubahan data akan tercatat di sini.',
                 )
               else
                 ..._controller.logs.map(
@@ -73,13 +74,22 @@ class _AdminLogsTabState extends State<AdminLogsTab> {
   }
 
   Widget _buildHeader() {
-    return AppCard(
-      backgroundColor: AppColors.inkDeep,
-      hasBorder: false,
-      radius: 32,
+    return PremiumGradientCard(
       child: Row(
         children: [
-          const Icon(Icons.history_rounded, color: AppColors.canvas, size: 38),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: AppColors.canvas.withValues(alpha: 0.14),
+              borderRadius: AppRadius.all(AppRadius.xxl),
+            ),
+            child: const Icon(
+              Icons.history_rounded,
+              color: AppColors.canvas,
+              size: 30,
+            ),
+          ),
           const SizedBox(width: AppSpacing.base),
           Expanded(
             child: Column(
@@ -87,13 +97,16 @@ class _AdminLogsTabState extends State<AdminLogsTab> {
               children: [
                 Text(
                   'Admin Audit Log',
-                  style: AppTextStyles.headingSm.copyWith(color: AppColors.canvas),
+                  style: AppTextStyles.headingSm.copyWith(
+                    color: AppColors.canvas,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Riwayat tindakan admin untuk transparansi moderasi.',
                   style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.canvas.withValues(alpha: 0.78),
+                    color: AppColors.canvas.withValues(alpha: 0.82),
                   ),
                 ),
               ],

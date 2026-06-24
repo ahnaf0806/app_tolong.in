@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_brand_logo.dart';
 import '../../../core/widgets/app_error_state.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../controllers/admin_dashboard_controller.dart';
 import '../models/admin_project_item_model.dart';
 import '../models/admin_report_item_model.dart';
@@ -129,9 +132,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         }
 
         if (_controller.errorMessage != null && _controller.data == null) {
-          return AppErrorState(
-            message: _controller.errorMessage!,
-            onRetry: _controller.loadDashboard,
+          return Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: AppErrorState(
+              message: _controller.errorMessage!,
+              onRetry: _controller.loadDashboard,
+            ),
           );
         }
 
@@ -142,22 +148,35 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           children: [
             _buildHeader(),
             if (_controller.isActionLoading) const LinearProgressIndicator(minHeight: 2),
-            TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.stone,
-              indicatorColor: AppColors.primary,
-              labelStyle: AppTextStyles.bodySmBold,
-              tabs: const [
-                Tab(text: 'Overview'),
-                Tab(text: 'Moderation'),
-                Tab(text: 'Reports'),
-                Tab(text: 'Users'),
-                Tab(text: 'Projects'),
-                Tab(text: 'Categories'),
-                Tab(text: 'Logs'),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+              child: PremiumGlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                radius: AppRadius.xxl,
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  dividerColor: Colors.transparent,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.stone,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    borderRadius: AppRadius.all(AppRadius.full),
+                  ),
+                  labelStyle: AppTextStyles.bodySmBold,
+                  tabs: const [
+                    Tab(text: 'Overview'),
+                    Tab(text: 'Moderation'),
+                    Tab(text: 'Reports'),
+                    Tab(text: 'Users'),
+                    Tab(text: 'Projects'),
+                    Tab(text: 'Categories'),
+                    Tab(text: 'Logs'),
+                  ],
+                ),
+              ),
             ),
             Expanded(
               child: TabBarView(
@@ -206,10 +225,21 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       ),
       child: Row(
         children: [
-          const Icon(Icons.admin_panel_settings_rounded, color: AppColors.primary),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text('Admin Dashboard', style: AppTextStyles.subtitleLg)),
-          IconButton(
+          const AppBrandLogo(size: 46),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Admin Dashboard', style: AppTextStyles.subtitleLg),
+                Text(
+                  'Control center Tolong.in',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.stone),
+                ),
+              ],
+            ),
+          ),
+          IconButton.filledTonal(
             onPressed: _controller.loadDashboard,
             icon: const Icon(Icons.refresh_rounded),
           ),

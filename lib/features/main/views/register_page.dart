@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_brand_logo.dart';
+import '../../../core/widgets/app_gradient_background.dart';
 import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../auth/controllers/auth_controller.dart';
-import '../../auth/widgets/auth_header.dart';
 import '../../auth/widgets/role_selector.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -44,16 +49,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _handleRegister() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
-
-    if (!isValid) {
-      return;
-    }
+    if (!isValid) return;
 
     int? semester;
 
     if (_isFreelancer) {
       semester = int.tryParse(_semesterController.text.trim());
-
       if (semester == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Semester wajib diisi dengan angka.')),
@@ -72,9 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
       role: _selectedRole,
     );
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,7 +81,6 @@ class _RegisterPageState extends State<RegisterPage> {
           content: Text('Registrasi berhasil. Kamu sudah bisa login.'),
         ),
       );
-
       Navigator.pop(context);
       return;
     }
@@ -96,36 +94,24 @@ class _RegisterPageState extends State<RegisterPage> {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName wajib diisi.';
     }
-
     return null;
   }
 
   String? _semesterValidator(String? value) {
-    if (!_isFreelancer) {
-      return null;
-    }
-
+    if (!_isFreelancer) return null;
     if (value == null || value.trim().isEmpty) {
       return 'Semester wajib diisi.';
     }
 
     final semester = int.tryParse(value);
-
-    if (semester == null) {
-      return 'Semester harus berupa angka.';
-    }
-
-    if (semester < 1 || semester > 14) {
-      return 'Semester harus antara 1 sampai 14.';
-    }
-
+    if (semester == null) return 'Semester harus berupa angka.';
+    if (semester < 1 || semester > 14) return 'Semester harus antara 1 sampai 14.';
     return null;
   }
 
   void _onRoleChanged(String role) {
     setState(() {
       _selectedRole = role;
-
       if (role == 'project_owner') {
         _universityController.clear();
         _studyProgramController.clear();
@@ -140,133 +126,213 @@ class _RegisterPageState extends State<RegisterPage> {
       animation: _controller,
       builder: (context, _) {
         return Scaffold(
-          appBar: AppBar(),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const AuthHeader(
-                      title: 'Buat akun baru',
-                      subtitle:
-                          'Daftar sesuai peran kamu di Tolongin: Project Owner atau Freelancer.',
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-
-                    CustomTextField(
-                      controller: _fullNameController,
-                      label: 'Nama Lengkap',
-                      prefixIcon: Icons.person_outline,
-                      validator: (value) {
-                        return _requiredValidator(value, 'Nama lengkap');
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-
-                    CustomTextField(
-                      controller: _emailController,
-                      label: 'Email',
-                      hint: 'contoh@email.com',
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icons.email_outlined,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Email wajib diisi.';
-                        }
-
-                        if (!value.contains('@')) {
-                          return 'Format email belum benar.';
-                        }
-
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-
-                    CustomTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      hint: 'Minimal 6 karakter',
-                      obscureText: _obscurePassword,
-                      prefixIcon: Icons.lock_outline,
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+          appBar: AppBar(
+            title: const Text('Daftar Akun'),
+          ),
+          body: AppGradientBackground(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _RegisterHero(),
+                        const SizedBox(height: AppSpacing.xl),
+                        PremiumGlassCard(
+                          radius: AppRadius.xxxl,
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Lengkapi Data Akun', style: AppTextStyles.headingSm),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  'Pilih peran yang sesuai agar pengalaman aplikasi langsung menyesuaikan kebutuhanmu.',
+                                  style: AppTextStyles.bodySm.copyWith(color: AppColors.slate),
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                CustomTextField(
+                                  controller: _fullNameController,
+                                  label: 'Nama Lengkap',
+                                  prefixIcon: Icons.person_outline,
+                                  validator: (value) {
+                                    return _requiredValidator(value, 'Nama lengkap');
+                                  },
+                                ),
+                                const SizedBox(height: AppSpacing.base),
+                                CustomTextField(
+                                  controller: _emailController,
+                                  label: 'Email',
+                                  hint: 'nama@email.com',
+                                  keyboardType: TextInputType.emailAddress,
+                                  prefixIcon: Icons.email_outlined,
+                                  validator: (value) {
+                                    final required = _requiredValidator(value, 'Email');
+                                    if (required != null) return required;
+                                    if (!(value?.contains('@') ?? false)) {
+                                      return 'Format email belum benar.';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: AppSpacing.base),
+                                CustomTextField(
+                                  controller: _passwordController,
+                                  label: 'Password',
+                                  hint: 'Minimal 6 karakter',
+                                  obscureText: _obscurePassword,
+                                  prefixIcon: Icons.lock_outline,
+                                  suffixIcon: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    final required = _requiredValidator(value, 'Password');
+                                    if (required != null) return required;
+                                    if ((value?.length ?? 0) < 6) {
+                                      return 'Password minimal 6 karakter.';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                RoleSelector(
+                                  selectedRole: _selectedRole,
+                                  onChanged: _onRoleChanged,
+                                ),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 240),
+                                  child: _isFreelancer
+                                      ? _FreelancerFields(
+                                          universityController: _universityController,
+                                          studyProgramController: _studyProgramController,
+                                          semesterController: _semesterController,
+                                          requiredValidator: _requiredValidator,
+                                          semesterValidator: _semesterValidator,
+                                        )
+                                      : const SizedBox.shrink(),
+                                ),
+                                const SizedBox(height: AppSpacing.xl),
+                                PrimaryButton(
+                                  text: 'Daftar Sekarang',
+                                  icon: Icons.rocket_launch_rounded,
+                                  variant: PrimaryButtonVariant.cobalt,
+                                  isLoading: _controller.isLoading,
+                                  onPressed: _handleRegister,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Password wajib diisi.';
-                        }
-
-                        if (value.length < 6) {
-                          return 'Password minimal 6 karakter.';
-                        }
-
-                        return null;
-                      },
+                        const SizedBox(height: AppSpacing.lg),
+                        Center(
+                          child: Text(
+                            'Dengan mendaftar, kamu bergabung dalam ekosistem project mahasiswa yang aman dan profesional.',
+                            style: AppTextStyles.caption.copyWith(color: AppColors.stone),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    RoleSelector(
-                      selectedRole: _selectedRole,
-                      onChanged: _onRoleChanged,
-                    ),
-
-                    if (_isFreelancer) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      CustomTextField(
-                        controller: _universityController,
-                        label: 'Universitas',
-                        prefixIcon: Icons.school_outlined,
-                        validator: (value) {
-                          return _requiredValidator(value, 'Universitas');
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.base),
-                      CustomTextField(
-                        controller: _studyProgramController,
-                        label: 'Program Studi',
-                        prefixIcon: Icons.menu_book_outlined,
-                        validator: (value) {
-                          return _requiredValidator(value, 'Program studi');
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.base),
-                      CustomTextField(
-                        controller: _semesterController,
-                        label: 'Semester',
-                        keyboardType: TextInputType.number,
-                        prefixIcon: Icons.numbers_outlined,
-                        validator: _semesterValidator,
-                      ),
-                    ],
-
-                    const SizedBox(height: AppSpacing.xl),
-
-                    PrimaryButton(
-                      text: 'Daftar',
-                      variant: PrimaryButtonVariant.cobalt,
-                      isLoading: _controller.isLoading,
-                      onPressed: _handleRegister,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _RegisterHero extends StatelessWidget {
+  const _RegisterHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumGlassCard(
+      radius: AppRadius.xxxl,
+      backgroundColor: AppColors.canvas.withValues(alpha: 0.80),
+      child: Row(
+        children: [
+          const AppBrandLogo(size: 68),
+          const SizedBox(width: AppSpacing.base),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Buat Akun Tolong.in', style: AppTextStyles.headingSm),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Mulai sebagai Project Owner atau Student Freelancer.',
+                  style: AppTextStyles.bodySm.copyWith(color: AppColors.slate),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FreelancerFields extends StatelessWidget {
+  final TextEditingController universityController;
+  final TextEditingController studyProgramController;
+  final TextEditingController semesterController;
+  final String? Function(String? value, String fieldName) requiredValidator;
+  final String? Function(String? value) semesterValidator;
+
+  const _FreelancerFields({
+    required this.universityController,
+    required this.studyProgramController,
+    required this.semesterController,
+    required this.requiredValidator,
+    required this.semesterValidator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: const ValueKey('freelancer-fields'),
+      children: [
+        const SizedBox(height: AppSpacing.lg),
+        CustomTextField(
+          controller: universityController,
+          label: 'Universitas',
+          prefixIcon: Icons.account_balance_outlined,
+          validator: (value) => requiredValidator(value, 'Universitas'),
+        ),
+        const SizedBox(height: AppSpacing.base),
+        CustomTextField(
+          controller: studyProgramController,
+          label: 'Program Studi',
+          prefixIcon: Icons.school_outlined,
+          validator: (value) => requiredValidator(value, 'Program studi'),
+        ),
+        const SizedBox(height: AppSpacing.base),
+        CustomTextField(
+          controller: semesterController,
+          label: 'Semester',
+          hint: 'Contoh: 4',
+          keyboardType: TextInputType.number,
+          prefixIcon: Icons.layers_outlined,
+          validator: semesterValidator,
+        ),
+      ],
     );
   }
 }

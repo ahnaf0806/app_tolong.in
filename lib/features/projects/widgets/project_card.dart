@@ -5,9 +5,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../models/project_model.dart';
 
-/// Widget card untuk menampilkan ringkasan project dalam daftar.
 class ProjectCard extends StatelessWidget {
   final ProjectModel project;
   final VoidCallback? onTap;
@@ -16,93 +16,75 @@ class ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.all(AppRadius.xl),
-        side: const BorderSide(color: AppColors.hairlineSoft),
-      ),
-      elevation: 0,
-      color: AppColors.canvas,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.all(AppRadius.xl),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.base),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return PremiumGlassCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              // Header: kategori + badge kesulitan
-              Row(
-                children: [
-                  Expanded(
-                    child: _CategoryChip(
-                      label: project.categoryName ?? project.projectField,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  _DifficultyBadge(difficulty: project.difficulty),
-                ],
+              Expanded(child: _SoftChip(label: project.categoryName ?? project.projectField)),
+              const SizedBox(width: AppSpacing.xs),
+              _DifficultyBadge(difficulty: project.difficulty),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            project.title,
+            style: AppTextStyles.subtitleLg.copyWith(color: AppColors.inkDeep),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            project.description,
+            style: AppTextStyles.bodySm.copyWith(color: AppColors.slate, height: 1.45),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _InfoPill(
+                  icon: Icons.payments_rounded,
+                  label: _formatBudget(project.budget),
+                  color: AppColors.success,
+                ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-
-              // Judul project
-              Text(
-                project.title,
-                style: AppTextStyles.bodyMdBold,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              const SizedBox(width: AppSpacing.xs),
+              _InfoPill(
+                icon: Icons.event_rounded,
+                label: _formatDeadline(project.deadline),
+                color: AppColors.primary,
               ),
-              const SizedBox(height: AppSpacing.xs),
-
-              // Deskripsi singkat
-              Text(
-                project.description,
-                style: AppTextStyles.bodySm,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.md),
-
-              // Footer: budget + deadline
-              Row(
-                children: [
-                  _InfoChip(
-                    icon: Icons.payments_outlined,
-                    label: _formatBudget(project.budget),
-                    color: AppColors.success,
-                    bgColor: const Color(0xFFE8F5EC),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  _InfoChip(
-                    icon: Icons.calendar_today_outlined,
-                    label: _formatDeadline(project.deadline),
-                    color: AppColors.charcoal,
-                    bgColor: AppColors.surfaceSoft,
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: AppColors.stone,
-                  ),
-                ],
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: AppRadius.all(AppRadius.full),
+                ),
+                child: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.primary,
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
 
   String _formatBudget(double budget) {
-    final formatter = NumberFormat.currency(
+    return NumberFormat.currency(
       locale: 'id_ID',
-      symbol: 'Rp',
+      symbol: 'Rp ',
       decimalDigits: 0,
-    );
-    return formatter.format(budget);
+    ).format(budget);
   }
 
   String _formatDeadline(DateTime deadline) {
@@ -110,16 +92,16 @@ class ProjectCard extends StatelessWidget {
   }
 }
 
-class _CategoryChip extends StatelessWidget {
+class _SoftChip extends StatelessWidget {
   final String label;
-  const _CategoryChip({required this.label});
+  const _SoftChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
+        vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.08),
@@ -127,10 +109,7 @@ class _CategoryChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTextStyles.caption.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w700,
-        ),
+        style: AppTextStyles.captionBold.copyWith(color: AppColors.primary),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -144,95 +123,70 @@ class _DifficultyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = _getDifficultyConfig(difficulty);
+    final config = _difficultyConfig(difficulty);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
+        vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: config.bgColor,
+        color: config.bg,
         borderRadius: AppRadius.all(AppRadius.full),
       ),
       child: Text(
         config.label,
-        style: AppTextStyles.caption.copyWith(
-          color: config.color,
-          fontWeight: FontWeight.w700,
-        ),
+        style: AppTextStyles.captionBold.copyWith(color: config.color),
       ),
     );
   }
 
-  _DifficultyConfig _getDifficultyConfig(String difficulty) {
-    switch (difficulty.toLowerCase()) {
+  _DiffConfig _difficultyConfig(String value) {
+    switch (value.toLowerCase()) {
       case 'easy':
-        return _DifficultyConfig(
-          label: 'Mudah',
-          color: AppColors.success,
-          bgColor: const Color(0xFFE8F5EC),
-        );
+        return const _DiffConfig('Mudah', AppColors.success, AppColors.successBg);
       case 'hard':
-        return _DifficultyConfig(
-          label: 'Sulit',
-          color: AppColors.critical,
-          bgColor: const Color(0xFFFFECEF),
-        );
+        return const _DiffConfig('Sulit', AppColors.critical, Color(0xFFFFECEF));
       default:
-        return _DifficultyConfig(
-          label: 'Menengah',
-          color: AppColors.attention,
-          bgColor: const Color(0xFFFFF4E0),
-        );
+        return const _DiffConfig('Sedang', AppColors.attention, AppColors.warningBg);
     }
   }
 }
 
-class _DifficultyConfig {
+class _DiffConfig {
   final String label;
   final Color color;
-  final Color bgColor;
-  const _DifficultyConfig({
-    required this.label,
-    required this.color,
-    required this.bgColor,
-  });
+  final Color bg;
+  const _DiffConfig(this.label, this.color, this.bg);
 }
 
-class _InfoChip extends StatelessWidget {
+class _InfoPill extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final Color bgColor;
 
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.bgColor,
-  });
+  const _InfoPill({required this.icon, required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
+        vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: color.withValues(alpha: 0.08),
         borderRadius: AppRadius.all(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.captionBold.copyWith(color: color),
             ),
           ),
         ],

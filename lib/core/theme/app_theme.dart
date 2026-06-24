@@ -12,7 +12,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.canvas,
+      scaffoldBackgroundColor: AppColors.canvasSoft,
       fontFamily: GoogleFonts.montserrat().fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
@@ -31,6 +31,10 @@ class AppTheme {
       textButtonTheme: _textButtonTheme,
       snackBarTheme: _snackBarTheme,
       dividerTheme: _dividerTheme,
+      navigationBarTheme: _navigationBarTheme,
+      cardTheme: _cardTheme,
+      bottomSheetTheme: _bottomSheetTheme,
+      dialogTheme: _dialogTheme,
     );
   }
 
@@ -54,9 +58,10 @@ class AppTheme {
 
   static AppBarTheme get _appBarTheme {
     return AppBarTheme(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: Colors.transparent,
       foregroundColor: AppColors.inkDeep,
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle: AppTextStyles.subtitleLg,
       surfaceTintColor: Colors.transparent,
@@ -65,25 +70,28 @@ class AppTheme {
   }
 
   static InputDecorationTheme get _inputDecorationTheme {
-    final borderRadius = AppRadius.all(AppRadius.lg);
+    final borderRadius = AppRadius.all(AppRadius.xl);
 
     return InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.canvas,
-      constraints: const BoxConstraints(minHeight: 44),
-      contentPadding: const EdgeInsets.all(AppSpacing.md),
-      labelStyle: AppTextStyles.bodySm,
+      fillColor: AppColors.canvas.withValues(alpha: 0.96),
+      constraints: const BoxConstraints(minHeight: 52),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.base,
+        vertical: AppSpacing.base,
+      ),
+      labelStyle: AppTextStyles.bodySm.copyWith(color: AppColors.slate),
       hintStyle: AppTextStyles.bodySm.copyWith(color: AppColors.steel),
       errorStyle: AppTextStyles.bodySm.copyWith(
         color: AppColors.criticalStrong,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: const BorderSide(color: AppColors.hairline),
+        borderSide: const BorderSide(color: AppColors.hairlineSoft),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: const BorderSide(color: AppColors.fbBlue, width: 2),
+        borderSide: const BorderSide(color: AppColors.fbBlue, width: 1.6),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: borderRadius,
@@ -91,8 +99,10 @@ class AppTheme {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: const BorderSide(color: AppColors.criticalStrong, width: 2),
+        borderSide: const BorderSide(color: AppColors.criticalStrong, width: 1.6),
       ),
+      prefixIconColor: AppColors.steel,
+      suffixIconColor: AppColors.steel,
     );
   }
 
@@ -104,11 +114,11 @@ class AppTheme {
         disabledBackgroundColor: AppColors.disabledText,
         disabledForegroundColor: AppColors.canvas,
         elevation: 0,
-        minimumSize: const Size.fromHeight(44),
+        minimumSize: const Size.fromHeight(50),
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
         textStyle: AppTextStyles.buttonMd,
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.all(AppRadius.full),
+          borderRadius: AppRadius.all(18),
         ),
       ),
     );
@@ -118,12 +128,13 @@ class AppTheme {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.inkDeep,
-        minimumSize: const Size.fromHeight(44),
+        minimumSize: const Size.fromHeight(50),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
         textStyle: AppTextStyles.buttonMd,
-        side: const BorderSide(color: AppColors.inkDeep, width: 2),
+        side: const BorderSide(color: AppColors.hairline, width: 1.3),
+        backgroundColor: AppColors.canvas.withValues(alpha: 0.9),
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.all(AppRadius.full),
+          borderRadius: AppRadius.all(18),
         ),
       ),
     );
@@ -152,6 +163,66 @@ class AppTheme {
       color: AppColors.hairlineSoft,
       thickness: 1,
       space: 1,
+    );
+  }
+
+  static NavigationBarThemeData get _navigationBarTheme {
+    return NavigationBarThemeData(
+      backgroundColor: AppColors.canvas.withValues(alpha: 0.97),
+      indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return IconThemeData(
+          color: selected ? AppColors.primary : AppColors.stone,
+          size: 22,
+        );
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return AppTextStyles.caption.copyWith(
+          color: selected ? AppColors.primary : AppColors.stone,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        );
+      }),
+      elevation: 0,
+      height: 72,
+      surfaceTintColor: Colors.transparent,
+    );
+  }
+
+  static CardThemeData get _cardTheme {
+    return CardThemeData(
+      color: AppColors.canvas,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.all(AppRadius.xl),
+        side: const BorderSide(color: AppColors.hairlineSoft),
+      ),
+      margin: EdgeInsets.zero,
+    );
+  }
+
+  static BottomSheetThemeData get _bottomSheetTheme {
+    return BottomSheetThemeData(
+      backgroundColor: AppColors.canvas,
+      modalBackgroundColor: AppColors.canvas,
+      surfaceTintColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxxl),
+        ),
+      ),
+    );
+  }
+
+  static DialogThemeData get _dialogTheme {
+    return DialogThemeData(
+      backgroundColor: AppColors.canvas,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.all(AppRadius.xxl),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class WorkspaceStatusBadge extends StatelessWidget {
@@ -12,14 +13,25 @@ class WorkspaceStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: _backgroundColor,
-        borderRadius: AppRadius.all(AppRadius.full),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
       ),
-      child: Text(
-        _displayText,
-        style: AppTextStyles.captionBold.copyWith(color: _textColor),
+      decoration: BoxDecoration(
+        color: _color.withValues(alpha: 0.12),
+        borderRadius: AppRadius.all(AppRadius.full),
+        border: Border.all(color: _color.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(_icon, size: 14, color: _color),
+          const SizedBox(width: AppSpacing.xxs),
+          Text(
+            _displayText,
+            style: AppTextStyles.captionBold.copyWith(color: _color),
+          ),
+        ],
       ),
     );
   }
@@ -39,7 +51,22 @@ class WorkspaceStatusBadge extends StatelessWidget {
     }
   }
 
-  Color get _backgroundColor {
+  IconData get _icon {
+    switch (status) {
+      case 'active':
+        return Icons.sync_rounded;
+      case 'submitted':
+        return Icons.outbox_rounded;
+      case 'completed':
+        return Icons.verified_rounded;
+      case 'cancelled':
+        return Icons.cancel_rounded;
+      default:
+        return Icons.info_rounded;
+    }
+  }
+
+  Color get _color {
     switch (status) {
       case 'active':
         return AppColors.primary;
@@ -51,18 +78,6 @@ class WorkspaceStatusBadge extends StatelessWidget {
         return AppColors.critical;
       default:
         return AppColors.stone;
-    }
-  }
-
-  Color get _textColor {
-    switch (status) {
-      case 'active':
-      case 'submitted':
-      case 'completed':
-      case 'cancelled':
-        return AppColors.canvas;
-      default:
-        return AppColors.inkDeep;
     }
   }
 }

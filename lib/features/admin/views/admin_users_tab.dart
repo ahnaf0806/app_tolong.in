@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../models/admin_user_item_model.dart';
 import '../widgets/admin_user_card.dart';
 
 class AdminUsersTab extends StatefulWidget {
   final List<AdminUserItemModel> users;
   final Future<void> Function(String userId, String status) onChangeUserStatus;
-  final Future<void> Function(String userId, String status)
-  onChangeVerification;
+  final Future<void> Function(String userId, String status) onChangeVerification;
   final void Function(AdminUserItemModel user) onOpenUser;
 
   const AdminUsersTab({
@@ -62,12 +62,10 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
         _buildSearchAndFilter(),
         const SizedBox(height: AppSpacing.lg),
         if (users.isEmpty)
-          AppCard(
-            child: Text(
-              'User tidak ditemukan.',
-              style: AppTextStyles.bodySm,
-              textAlign: TextAlign.center,
-            ),
+          const AppEmptyState(
+            icon: Icons.person_search_rounded,
+            title: 'User tidak ditemukan',
+            message: 'Coba ubah kata kunci pencarian atau filter role.',
           )
         else
           ...users.map(
@@ -90,7 +88,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
   }
 
   Widget _buildSearchAndFilter() {
-    return AppCard(
+    return PremiumGlassCard(
       child: Column(
         children: [
           TextField(
@@ -104,16 +102,17 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
             initialValue: _role,
-            decoration: const InputDecoration(labelText: 'Filter Role'),
+            decoration: const InputDecoration(
+              labelText: 'Filter Role',
+              prefixIcon: Icon(Icons.badge_rounded),
+            ),
             items: const [
               DropdownMenuItem(value: 'all', child: Text('Semua Role')),
-              DropdownMenuItem(
-                value: 'project_owner',
-                child: Text('Project Owner'),
-              ),
+              DropdownMenuItem(value: 'project_owner', child: Text('Project Owner')),
               DropdownMenuItem(value: 'freelancer', child: Text('Freelancer')),
               DropdownMenuItem(value: 'admin', child: Text('Admin')),
             ],
+            dropdownColor: AppColors.canvas,
             onChanged: (value) {
               if (value == null) return;
               setState(() => _role = value);

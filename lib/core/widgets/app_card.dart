@@ -24,13 +24,23 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = Container(
+    final borderRadius = AppRadius.all(radius);
+
+    final card = AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: AppRadius.all(radius),
+        borderRadius: borderRadius,
         border: hasBorder ? Border.all(color: AppColors.hairlineSoft) : null,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.inkDeep.withValues(alpha: 0.04),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: child,
     );
@@ -43,7 +53,7 @@ class AppCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: AppRadius.all(radius),
+        borderRadius: borderRadius,
         child: card,
       ),
     );

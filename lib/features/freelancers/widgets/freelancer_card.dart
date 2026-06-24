@@ -9,22 +9,23 @@ import '../models/freelancer_summary_model.dart';
 
 class FreelancerCard extends StatelessWidget {
   final FreelancerSummaryModel freelancer;
+  final VoidCallback? onTap;
 
-  const FreelancerCard({super.key, required this.freelancer});
+  const FreelancerCard({
+    super.key,
+    required this.freelancer,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final studyInfo = [
-      freelancer.studyProgram,
-      freelancer.university,
-    ].whereType<String>().where((item) => item.trim().isNotEmpty).join(' • ');
-
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Avatar(photoUrl: freelancer.photoUrl, name: freelancer.name),
               const SizedBox(width: AppSpacing.md),
@@ -40,12 +41,11 @@ class FreelancerCard extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      studyInfo.isEmpty
-                          ? 'Data kampus belum dilengkapi'
-                          : studyInfo,
-                      style: AppTextStyles.bodySm.copyWith(
-                        color: AppColors.charcoal,
-                      ),
+                      [
+                        freelancer.studyProgram,
+                        freelancer.university,
+                      ].whereType<String>().where((item) => item.isNotEmpty).join(' • '),
+                      style: AppTextStyles.bodySm,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -53,61 +53,48 @@ class FreelancerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              _VerificationChip(
-                label: freelancer.verificationLabel,
-                status: freelancer.verificationStatus,
-              ),
+              _VerificationChip(label: freelancer.verificationLabel),
+              if (onTap != null) ...[
+                const SizedBox(width: AppSpacing.xs),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.stone,
+                ),
+              ],
             ],
           ),
+          const SizedBox(height: AppSpacing.base),
           if ((freelancer.bio ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.base),
             Text(
               freelancer.bio!,
               style: AppTextStyles.bodySm.copyWith(color: AppColors.charcoal),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+            const SizedBox(height: AppSpacing.base),
           ],
-          const SizedBox(height: AppSpacing.base),
           _SkillWrap(skills: freelancer.skills),
           const SizedBox(height: AppSpacing.base),
           Row(
             children: [
-              const Icon(
-                Icons.star_rounded,
-                size: 18,
-                color: AppColors.warning,
-              ),
-              const SizedBox(width: AppSpacing.xxs),
+              const Icon(Icons.star_rounded, size: 18, color: AppColors.warning),
+              const SizedBox(width: 4),
               Text(
                 freelancer.ratingAverage.toStringAsFixed(1),
                 style: AppTextStyles.bodySmBold,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  '${freelancer.totalProjects} project selesai',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.stone),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              Text(
+                '${freelancer.totalProjects} project selesai',
+                style: AppTextStyles.caption.copyWith(color: AppColors.stone),
               ),
+              const Spacer(),
               if ((freelancer.portfolioUrl ?? '').trim().isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    borderRadius: AppRadius.all(AppRadius.full),
-                  ),
-                  child: Text(
-                    'Portofolio',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                Text(
+                  'Portofolio tersedia',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
             ],
@@ -126,10 +113,10 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cleanName = name.trim();
-    final initials = cleanName.isEmpty
+    final initials = name.trim().isEmpty
         ? 'F'
-        : cleanName
+        : name
+              .trim()
               .split(RegExp(r'\s+'))
               .take(2)
               .map((part) => part[0].toUpperCase())
@@ -138,15 +125,13 @@ class _Avatar extends StatelessWidget {
     return CircleAvatar(
       radius: 28,
       backgroundColor: AppColors.surfaceSoft,
-      backgroundImage: photoUrl == null || photoUrl!.trim().isEmpty
+      backgroundImage: photoUrl == null || photoUrl!.isEmpty
           ? null
           : NetworkImage(photoUrl!),
-      child: photoUrl == null || photoUrl!.trim().isEmpty
+      child: photoUrl == null || photoUrl!.isEmpty
           ? Text(
               initials,
-              style: AppTextStyles.bodyMdBold.copyWith(
-                color: AppColors.primary,
-              ),
+              style: AppTextStyles.bodyMdBold.copyWith(color: AppColors.primary),
             )
           : null,
     );
@@ -155,13 +140,12 @@ class _Avatar extends StatelessWidget {
 
 class _VerificationChip extends StatelessWidget {
   final String label;
-  final String status;
 
-  const _VerificationChip({required this.label, required this.status});
+  const _VerificationChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final isVerified = status == 'verified';
+    final isVerified = label == 'Terverifikasi';
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -169,9 +153,7 @@ class _VerificationChip extends StatelessWidget {
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: isVerified
-            ? AppColors.success.withValues(alpha: 0.12)
-            : AppColors.surfaceSoft,
+        color: isVerified ? AppColors.success.withValues(alpha: 0.12) : AppColors.surfaceSoft,
         borderRadius: AppRadius.all(AppRadius.full),
       ),
       child: Text(
@@ -193,57 +175,31 @@ class _SkillWrap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (skills.isEmpty) {
-      return Text(
-        'Belum ada keahlian',
-        style: AppTextStyles.bodySm.copyWith(color: AppColors.stone),
-      );
+      return Text('Belum ada keahlian', style: AppTextStyles.bodySm);
     }
-
-    final visibleSkills = skills.take(5).toList();
-    final hiddenCount = skills.length - visibleSkills.length;
 
     return Wrap(
       spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
-      children: [
-        ...visibleSkills.map(
-          (skill) => Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xxs,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: AppRadius.all(AppRadius.full),
-            ),
-            child: Text(
-              skill,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
+      children: skills.take(5).map((skill) {
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xxs,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: AppRadius.all(AppRadius.full),
+          ),
+          child: Text(
+            skill,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
             ),
           ),
-        ),
-        if (hiddenCount > 0)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xxs,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSoft,
-              borderRadius: AppRadius.all(AppRadius.full),
-            ),
-            child: Text(
-              '+$hiddenCount',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.stone,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-      ],
+        );
+      }).toList(),
     );
   }
 }

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../../projects/models/project_model.dart';
 
 class ProposalFormInfoCard extends StatelessWidget {
@@ -10,51 +15,43 @@ class ProposalFormInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: Colors.grey.shade300),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(project.title, style: textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(project.projectField, style: textTheme.bodyMedium),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _InfoItem(
-                    label: 'Budget',
-                    value: _formatBudget(project.budget),
-                  ),
+    return PremiumGlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(project.title, style: AppTextStyles.subtitleLg),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            project.projectField,
+            style: AppTextStyles.bodySm.copyWith(color: AppColors.slate),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _InfoItem(
+                  icon: Icons.payments_rounded,
+                  label: 'Budget',
+                  value: _formatBudget(project.budget),
                 ),
-                Expanded(
-                  child: _InfoItem(
-                    label: 'Deadline',
-                    value: _formatDeadline(project.deadline),
-                  ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _InfoItem(
+                  icon: Icons.event_rounded,
+                  label: 'Deadline',
+                  value: _formatDeadline(project.deadline),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   String _formatBudget(double budget) {
-    return NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    ).format(budget);
+    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(budget);
   }
 
   String _formatDeadline(DateTime deadline) {
@@ -63,25 +60,29 @@ class ProposalFormInfoCard extends StatelessWidget {
 }
 
 class _InfoItem extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
 
-  const _InfoItem({required this.label, required this.value});
+  const _InfoItem({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodySmall),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.07),
+        borderRadius: AppRadius.all(AppRadius.xl),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.primary),
+          const SizedBox(height: AppSpacing.sm),
+          Text(label, style: AppTextStyles.caption),
+          Text(value, style: AppTextStyles.bodySmBold),
+        ],
+      ),
     );
   }
 }

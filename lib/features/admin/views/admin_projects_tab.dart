@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/premium_glass_card.dart';
 import '../models/admin_project_item_model.dart';
 import '../widgets/admin_project_card.dart';
 
@@ -59,12 +60,10 @@ class _AdminProjectsTabState extends State<AdminProjectsTab> {
         _buildSearchAndFilter(),
         const SizedBox(height: AppSpacing.lg),
         if (projects.isEmpty)
-          AppCard(
-            child: Text(
-              'Project tidak ditemukan.',
-              style: AppTextStyles.bodySm,
-              textAlign: TextAlign.center,
-            ),
+          const AppEmptyState(
+            icon: Icons.folder_off_rounded,
+            title: 'Project tidak ditemukan',
+            message: 'Coba ubah pencarian atau filter status project.',
           )
         else
           ...projects.map(
@@ -73,9 +72,7 @@ class _AdminProjectsTabState extends State<AdminProjectsTab> {
               child: AdminProjectCard(
                 project: project,
                 onTap: () => widget.onOpenProject(project),
-                onChangeStatus: (status) {
-                  widget.onChangeStatus(project.id, status);
-                },
+                onChangeStatus: (status) => widget.onChangeStatus(project.id, status),
               ),
             ),
           ),
@@ -84,7 +81,7 @@ class _AdminProjectsTabState extends State<AdminProjectsTab> {
   }
 
   Widget _buildSearchAndFilter() {
-    return AppCard(
+    return PremiumGlassCard(
       child: Column(
         children: [
           TextField(
@@ -98,7 +95,10 @@ class _AdminProjectsTabState extends State<AdminProjectsTab> {
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
             initialValue: _status,
-            decoration: const InputDecoration(labelText: 'Filter Status'),
+            decoration: const InputDecoration(
+              labelText: 'Filter Status',
+              prefixIcon: Icon(Icons.tune_rounded),
+            ),
             items: const [
               DropdownMenuItem(value: 'all', child: Text('Semua Status')),
               DropdownMenuItem(value: 'open', child: Text('Terbuka')),
@@ -106,6 +106,7 @@ class _AdminProjectsTabState extends State<AdminProjectsTab> {
               DropdownMenuItem(value: 'completed', child: Text('Selesai')),
               DropdownMenuItem(value: 'cancelled', child: Text('Dibatalkan')),
             ],
+            dropdownColor: AppColors.canvas,
             onChanged: (value) {
               if (value == null) return;
               setState(() => _status = value);

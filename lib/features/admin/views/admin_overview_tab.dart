@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_brand_logo.dart';
+import '../../../core/widgets/premium_glass_card.dart';
+import '../../../core/widgets/premium_gradient_card.dart';
+import '../../../core/widgets/premium_metric_tile.dart';
 import '../models/admin_stats_model.dart';
-import '../widgets/admin_metric_card.dart';
 
 class AdminOverviewTab extends StatelessWidget {
   final AdminStatsModel stats;
@@ -15,45 +18,45 @@ class AdminOverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final metrics = [
-      AdminMetricCard(
-        title: 'Total User',
+      PremiumMetricTile(
         value: stats.totalUsers.toString(),
-        subtitle: '${stats.totalFreelancers} freelancer',
+        label: 'Total User',
+        caption: '${stats.totalFreelancers} freelancer',
         icon: Icons.people_alt_rounded,
         color: AppColors.primary,
       ),
-      AdminMetricCard(
-        title: 'Project',
+      PremiumMetricTile(
         value: stats.totalProjects.toString(),
-        subtitle: '${stats.openProjects} terbuka',
+        label: 'Project',
+        caption: '${stats.openProjects} terbuka',
         icon: Icons.folder_copy_rounded,
         color: AppColors.oculusPurple,
       ),
-      AdminMetricCard(
-        title: 'Workspace',
+      PremiumMetricTile(
         value: stats.totalWorkspaces.toString(),
-        subtitle: '${stats.activeWorkspaces} aktif',
+        label: 'Workspace',
+        caption: '${stats.activeWorkspaces} aktif',
         icon: Icons.work_rounded,
         color: AppColors.attention,
       ),
-      AdminMetricCard(
-        title: 'Laporan',
+      PremiumMetricTile(
         value: stats.totalReports.toString(),
-        subtitle: '${stats.pendingReports} menunggu',
+        label: 'Laporan',
+        caption: '${stats.pendingReports} menunggu',
         icon: Icons.report_rounded,
         color: AppColors.critical,
       ),
-      AdminMetricCard(
-        title: 'User Diblokir',
+      PremiumMetricTile(
         value: stats.blockedUsers.toString(),
-        subtitle: 'akun bermasalah',
+        label: 'User Diblokir',
+        caption: 'akun bermasalah',
         icon: Icons.block_rounded,
         color: AppColors.criticalStrong,
       ),
-      AdminMetricCard(
-        title: 'Rating Rata-rata',
+      PremiumMetricTile(
         value: stats.averageRating.toStringAsFixed(1),
-        subtitle: '${stats.totalReviews} ulasan',
+        label: 'Rating Rata-rata',
+        caption: '${stats.totalReviews} ulasan',
         icon: Icons.star_rounded,
         color: AppColors.warning,
       ),
@@ -72,28 +75,22 @@ class AdminOverviewTab extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: AppSpacing.md,
             mainAxisSpacing: AppSpacing.md,
-            childAspectRatio: 1.25,
+            childAspectRatio: 1.05,
           ),
           itemBuilder: (_, index) => metrics[index],
         ),
         const SizedBox(height: AppSpacing.xl),
-        _buildBreakdown(),
+        _buildOperationsPanel(),
       ],
     );
   }
 
   Widget _buildHero() {
-    return AppCard(
-      backgroundColor: AppColors.inkDeep,
-      hasBorder: false,
-      radius: 32,
+    return PremiumGradientCard(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.admin_panel_settings_rounded,
-            color: AppColors.canvas,
-            size: 42,
-          ),
+          const AppBrandLogo(size: 58),
           const SizedBox(width: AppSpacing.base),
           Expanded(
             child: Column(
@@ -103,14 +100,25 @@ class AdminOverviewTab extends StatelessWidget {
                   'Admin Control Center',
                   style: AppTextStyles.headingSm.copyWith(
                     color: AppColors.canvas,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Pantau ekosistem Tolong.in dari user, project, laporan, sampai kualitas freelancer.',
+                  'Pantau user, project, laporan, kategori, dan kualitas ekosistem Tolong.in dari satu dashboard modern.',
                   style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.canvas.withValues(alpha: 0.78),
+                    color: AppColors.canvas.withValues(alpha: 0.86),
                   ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: const [
+                    _AdminBadge(icon: Icons.security_rounded, label: 'Aman'),
+                    _AdminBadge(icon: Icons.analytics_rounded, label: 'Terukur'),
+                    _AdminBadge(icon: Icons.gavel_rounded, label: 'Moderasi'),
+                  ],
                 ),
               ],
             ),
@@ -120,38 +128,77 @@ class AdminOverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _buildBreakdown() {
-    return AppCard(
+  Widget _buildOperationsPanel() {
+    return PremiumGlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Ringkasan Operasional', style: AppTextStyles.subtitleLg),
-          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.09),
+                  borderRadius: AppRadius.all(AppRadius.xl),
+                ),
+                child: const Icon(
+                  Icons.insights_rounded,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Ringkasan Operasional', style: AppTextStyles.subtitleLg),
+                    Text(
+                      'Kondisi platform saat ini',
+                      style: AppTextStyles.caption.copyWith(color: AppColors.stone),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
           _RowInfo(label: 'Project Owner', value: stats.totalOwners.toString()),
-          _RowInfo(
-            label: 'Student Freelancer',
-            value: stats.totalFreelancers.toString(),
-          ),
+          _RowInfo(label: 'Student Freelancer', value: stats.totalFreelancers.toString()),
           _RowInfo(label: 'Admin', value: stats.totalAdmins.toString()),
-          _RowInfo(
-            label: 'Project Berjalan',
-            value: stats.inProgressProjects.toString(),
-          ),
-          _RowInfo(
-            label: 'Project Selesai',
-            value: stats.completedProjects.toString(),
-          ),
-          _RowInfo(
-            label: 'Project Dibatalkan',
-            value: stats.cancelledProjects.toString(),
-          ),
-          _RowInfo(
-            label: 'Laporan Ditinjau',
-            value: stats.reviewedReports.toString(),
-          ),
-          _RowInfo(
-            label: 'Laporan Selesai',
-            value: stats.resolvedReports.toString(),
+          _RowInfo(label: 'Project Berjalan', value: stats.inProgressProjects.toString()),
+          _RowInfo(label: 'Project Selesai', value: stats.completedProjects.toString()),
+          _RowInfo(label: 'Project Dibatalkan', value: stats.cancelledProjects.toString()),
+          _RowInfo(label: 'Laporan Ditinjau', value: stats.reviewedReports.toString()),
+          _RowInfo(label: 'Laporan Selesai', value: stats.resolvedReports.toString()),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _AdminBadge({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: AppColors.canvas.withValues(alpha: 0.15),
+        borderRadius: AppRadius.all(AppRadius.full),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: AppColors.canvas),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: AppTextStyles.captionBold.copyWith(color: AppColors.canvas),
           ),
         ],
       ),
@@ -167,8 +214,17 @@ class _RowInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.base,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.all(AppRadius.xl),
+        border: Border.all(color: AppColors.hairlineSoft),
+      ),
       child: Row(
         children: [
           Expanded(child: Text(label, style: AppTextStyles.bodySm)),

@@ -28,7 +28,7 @@ class PrimaryButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 44,
+      height: 52,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
@@ -37,10 +37,11 @@ class PrimaryButton extends StatelessWidget {
           disabledBackgroundColor: AppColors.disabledText,
           disabledForegroundColor: AppColors.canvas,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
           textStyle: AppTextStyles.buttonMd,
           shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.all(AppRadius.full),
+            borderRadius: AppRadius.all(18),
           ),
         ),
         child: _buildChild(),
@@ -60,8 +61,8 @@ class PrimaryButton extends StatelessWidget {
   Widget _buildChild() {
     if (isLoading) {
       return const SizedBox(
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           color: AppColors.canvas,
@@ -81,9 +82,12 @@ class PrimaryButton extends StatelessWidget {
       children: [
         Icon(icon, size: 18),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: AppTextStyles.buttonMd.copyWith(color: AppColors.canvas),
+        Flexible(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.buttonMd.copyWith(color: AppColors.canvas),
+          ),
         ),
       ],
     );

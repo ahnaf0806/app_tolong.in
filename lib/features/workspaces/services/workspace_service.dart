@@ -50,7 +50,7 @@ class WorkspaceService {
       return null;
     }
 
-    return WorkspaceModel.fromJson(response as Map<String, dynamic>);
+    return WorkspaceModel.fromJson(response);
   }
 
   Future<void> markWorkspaceSubmitted({

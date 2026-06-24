@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_brand_logo.dart';
+import '../../../core/widgets/app_gradient_background.dart';
+import '../../admin/views/admin_dashboard_page.dart';
 import '../../auth/controllers/auth_controller.dart';
-import '../../profiles/services/profile_service.dart';
-import '../../projects/views/create_project_page.dart';
-import '../../projects/views/project_list_page.dart';
-import 'owner_activity_page.dart';
-import '../../profiles/views/profile_page.dart';
-import 'freelancer_activity_page.dart';
-import 'home_dashboard_page.dart';
 import '../../chat/views/chat_inbox_page.dart';
 import '../../freelancers/views/freelancer_directory_page.dart';
-import '../../admin/views/admin_dashboard_page.dart';
+import '../../profiles/services/profile_service.dart';
+import '../../profiles/views/profile_page.dart';
+import '../../projects/views/create_project_page.dart';
+import '../../projects/views/project_list_page.dart';
+import 'freelancer_activity_page.dart';
+import 'home_dashboard_page.dart';
+import 'owner_activity_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -39,9 +39,7 @@ class _MainShellState extends State<MainShell> {
   Future<void> _loadCurrentRole() async {
     final role = await _profileService.getCurrentUserRole();
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     setState(() {
       _currentRole = role;
@@ -81,6 +79,7 @@ class _MainShellState extends State<MainShell> {
         ),
       ];
     }
+
     if (_currentRole == 'project_owner') {
       return [
         const _MainNavItem(
@@ -88,7 +87,7 @@ class _MainShellState extends State<MainShell> {
           destination: NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+            label: 'Beranda',
           ),
         ),
         const _MainNavItem(
@@ -125,7 +124,7 @@ class _MainShellState extends State<MainShell> {
         ),
         _MainNavItem(
           page: ProfilePage(onLogout: _logout),
-          destination: NavigationDestination(
+          destination: const NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person_rounded),
             label: 'Profil',
@@ -140,7 +139,7 @@ class _MainShellState extends State<MainShell> {
         destination: NavigationDestination(
           icon: Icon(Icons.home_outlined),
           selectedIcon: Icon(Icons.home_rounded),
-          label: 'Home',
+          label: 'Beranda',
         ),
       ),
       const _MainNavItem(
@@ -169,7 +168,7 @@ class _MainShellState extends State<MainShell> {
       ),
       _MainNavItem(
         page: ProfilePage(onLogout: _logout),
-        destination: NavigationDestination(
+        destination: const NavigationDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person_rounded),
           label: 'Profil',
@@ -181,7 +180,11 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     if (_isLoadingRole) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: AppGradientBackground(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
     }
 
     final navItems = _getNavigationItems();
@@ -189,19 +192,70 @@ class _MainShellState extends State<MainShell> {
     final currentPage = navItems[safeIndex].page;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tolong.in')),
-      body: currentPage,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: safeIndex,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: navItems.map((item) => item.destination).toList(),
+      extendBody: true,
+      appBar: AppBar(
+        toolbarHeight: 72,
+        titleSpacing: 18,
+        title: Row(
+          children: [
+            const AppBrandLogo(size: 42),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Tolong.in'),
+                  Text(
+                    _roleSubtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.stone,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: AppGradientBackground(child: currentPage),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.inkDeep.withValues(alpha: 0.10),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: NavigationBar(
+              selectedIndex: safeIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              destinations: navItems.map((item) => item.destination).toList(),
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  String get _roleSubtitle {
+    if (_currentRole == 'admin') return 'Admin Control Center';
+    if (_currentRole == 'project_owner') return 'Project Owner Workspace';
+    return 'Student Freelancer Workspace';
   }
 }
 

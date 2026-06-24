@@ -1,10 +1,12 @@
-import 'package:app_tolongin/core/widgets/app_empety_state.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_error_state.dart';
+import '../../../core/widgets/app_gradient_background.dart';
+import '../../../core/widgets/premium_gradient_card.dart';
 import '../controllers/my_proposal_controller.dart';
 import '../widgets/my_proposal_card.dart';
 
@@ -32,71 +34,79 @@ class _MyProposalsPageState extends State<MyProposalsPage> {
 
   Future<void> _loadProposals() async {
     await _controller.loadProposals();
-
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return RefreshIndicator(
-          color: AppColors.primary,
-          onRefresh: _loadProposals,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            children: [
-              Text('Proposal Saya', style: AppTextStyles.headingLg),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'Pantau status proposal yang sudah kamu kirim.',
-                style: AppTextStyles.bodyMd.copyWith(color: AppColors.stone),
+    return AppGradientBackground(
+      child: SafeArea(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            return RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: _loadProposals,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                children: [
+                  _hero(),
+                  const SizedBox(height: AppSpacing.xl),
+                  if (_controller.isLoading && _controller.proposals.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: AppSpacing.xl),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (_controller.errorMessage != null && _controller.proposals.isEmpty)
+                    AppErrorState(message: _controller.errorMessage!, onRetry: _loadProposals)
+                  else if (_controller.proposals.isEmpty)
+                    const AppEmptyState(
+                      icon: Icons.assignment_outlined,
+                      title: 'Belum Ada Proposal',
+                      message: 'Proposal yang kamu kirim ke project akan tampil di halaman ini.',
+                    )
+                  else
+                    ..._buildProposalItems(),
+                ],
               ),
-              const SizedBox(height: AppSpacing.xl),
-              if (_controller.isLoading && _controller.proposals.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: AppSpacing.xl),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_controller.errorMessage != null &&
-                  _controller.proposals.isEmpty)
-                AppErrorState(
-                  message: _controller.errorMessage!,
-                  onRetry: _loadProposals,
-                )
-              else if (_controller.proposals.isEmpty)
-                const AppEmptyState(
-                  icon: Icons.assignment_outlined,
-                  title: 'Belum Ada Proposal',
-                  message:
-                      'Proposal yang kamu kirim ke project akan tampil di halaman ini.',
-                )
-              else
-                ..._buildProposalItems(),
-            ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _hero() {
+    return PremiumGradientCard(
+      child: Row(
+        children: [
+          const Icon(Icons.assignment_turned_in_rounded, color: AppColors.canvas, size: 42),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Proposal Saya', style: AppTextStyles.headingSm.copyWith(color: AppColors.canvas)),
+                Text(
+                  'Pantau status penawaran dan peluang project kamu.',
+                  style: AppTextStyles.bodySm.copyWith(color: AppColors.canvas.withValues(alpha: 0.86)),
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
   List<Widget> _buildProposalItems() {
     final items = <Widget>[];
-
     for (var index = 0; index < _controller.proposals.length; index++) {
       final proposal = _controller.proposals[index];
-
       items.add(MyProposalCard(proposal: proposal));
-
-      if (index != _controller.proposals.length - 1) {
-        items.add(const SizedBox(height: AppSpacing.md));
-      }
+      if (index != _controller.proposals.length - 1) items.add(const SizedBox(height: AppSpacing.md));
     }
-
     return items;
   }
 }

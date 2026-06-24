@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../models/profile_model.dart';
 
 class ProfileEditSheet extends StatefulWidget {
@@ -15,8 +18,7 @@ class ProfileEditSheet extends StatefulWidget {
     String? bio,
     required String skillsText,
     String? portfolioUrl,
-  })
-  onSave;
+  }) onSave;
 
   const ProfileEditSheet({
     super.key,
@@ -41,24 +43,13 @@ class _ProfileEditSheetState extends State<ProfileEditSheet> {
   @override
   void initState() {
     super.initState();
-
     _nameController = TextEditingController(text: widget.profile.name);
-    _universityController = TextEditingController(
-      text: widget.profile.university ?? '',
-    );
-    _studyProgramController = TextEditingController(
-      text: widget.profile.studyProgram ?? '',
-    );
-    _semesterController = TextEditingController(
-      text: widget.profile.semester?.toString() ?? '',
-    );
+    _universityController = TextEditingController(text: widget.profile.university ?? '');
+    _studyProgramController = TextEditingController(text: widget.profile.studyProgram ?? '');
+    _semesterController = TextEditingController(text: widget.profile.semester?.toString() ?? '');
     _bioController = TextEditingController(text: widget.profile.bio ?? '');
-    _skillsController = TextEditingController(
-      text: widget.profile.skills.join(', '),
-    );
-    _portfolioController = TextEditingController(
-      text: widget.profile.portfolioUrl ?? '',
-    );
+    _skillsController = TextEditingController(text: widget.profile.skills.join(', '));
+    _portfolioController = TextEditingController(text: widget.profile.portfolioUrl ?? '');
   }
 
   @override
@@ -88,13 +79,8 @@ class _ProfileEditSheetState extends State<ProfileEditSheet> {
       portfolioUrl: _portfolioController.text,
     );
 
-    if (!mounted) {
-      return;
-    }
-
-    if (success) {
-      Navigator.pop(context);
-    }
+    if (!mounted) return;
+    if (success) Navigator.pop(context);
   }
 
   @override
@@ -106,110 +92,82 @@ class _ProfileEditSheetState extends State<ProfileEditSheet> {
         padding: EdgeInsets.only(
           left: AppSpacing.xl,
           right: AppSpacing.xl,
-          top: AppSpacing.xl,
+          top: AppSpacing.lg,
           bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
         ),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(99),
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.hairline,
+                    borderRadius: AppRadius.all(AppRadius.full),
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                'Edit Profil',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text('Edit Profil', style: AppTextStyles.headingSm),
               const SizedBox(height: AppSpacing.lg),
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Lengkap',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+              _input(controller: _nameController, label: 'Nama Lengkap', icon: Icons.person_rounded),
               if (isFreelancer) ...[
                 const SizedBox(height: AppSpacing.base),
-                TextField(
-                  controller: _universityController,
-                  decoration: const InputDecoration(
-                    labelText: 'Universitas',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _input(controller: _universityController, label: 'Universitas', icon: Icons.school_rounded),
                 const SizedBox(height: AppSpacing.base),
-                TextField(
-                  controller: _studyProgramController,
-                  decoration: const InputDecoration(
-                    labelText: 'Program Studi',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _input(controller: _studyProgramController, label: 'Program Studi', icon: Icons.menu_book_rounded),
                 const SizedBox(height: AppSpacing.base),
-                TextField(
+                _input(
                   controller: _semesterController,
+                  label: 'Semester',
+                  icon: Icons.timeline_rounded,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Semester',
-                    border: OutlineInputBorder(),
-                  ),
                 ),
                 const SizedBox(height: AppSpacing.base),
-                TextField(
-                  controller: _skillsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Skills',
-                    hintText: 'Contoh: Flutter, UI Design, Excel',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _input(controller: _skillsController, label: 'Skills', hint: 'Contoh: Flutter, UI Design, Excel', icon: Icons.psychology_rounded),
                 const SizedBox(height: AppSpacing.base),
-                TextField(
-                  controller: _portfolioController,
-                  decoration: const InputDecoration(
-                    labelText: 'Link Portfolio',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _input(controller: _portfolioController, label: 'Link Portfolio', icon: Icons.link_rounded),
                 const SizedBox(height: AppSpacing.base),
-                TextField(
-                  controller: _bioController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Bio',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _input(controller: _bioController, label: 'Bio', icon: Icons.notes_rounded, maxLines: 4),
               ],
               const SizedBox(height: AppSpacing.xl),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: widget.isSaving ? null : _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: widget.isSaving
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Simpan Profil'),
-                ),
+              PrimaryButton(
+                text: 'Simpan Profil',
+                icon: Icons.save_rounded,
+                isLoading: widget.isSaving,
+                variant: PrimaryButtonVariant.cobalt,
+                onPressed: _save,
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _input({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon),
+        filled: true,
+        fillColor: AppColors.surfaceSoft,
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.all(AppRadius.xl),
+          borderSide: BorderSide.none,
         ),
       ),
     );
